@@ -3,7 +3,7 @@
 A production-style LMS prototype for Solana developer education.
 
 ## Hosted demo
-(TBD after Vercel deploy)
+https://superteam-academy-lms.vercel.app
 
 ## What this MVP includes
 - Pill-style UI + modern typography
