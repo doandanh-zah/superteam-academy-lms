@@ -9,6 +9,7 @@ import { PublicKey, TransactionInstruction, TransactionMessage, VersionedTransac
 
 import { TRACKS, lessonsByTrack, findLesson, type TrackId } from '@/lib/curriculum';
 import { renderMd } from '@/lib/md';
+import LessonAnimation from '@/components/LessonAnimation';
 import { loadProgress, saveProgress, markLessonComplete, markQuizPassed, isQuizPassed } from '@/lib/progress';
 
 const MEMO_PROGRAM_ID = new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr');
@@ -79,7 +80,6 @@ export default function LessonPage() {
 
   async function finishLesson() {
     setErr('');
-    setSig('');
 
     if (!allSubmitted) {
       setErr('Submit each question first.');
@@ -91,13 +91,21 @@ export default function LessonPage() {
       return;
     }
 
+    // Free learning: finishing a lesson is purely local progress (no on-chain signing).
     const updated1 = markQuizPassed(state, track, lessonId);
     const updated2 = markLessonComplete(updated1, track, lessonId);
     setState(updated2);
     saveProgress(walletKey, updated2);
+  }
 
-    // Optional on-chain receipt if wallet connected
-    if (!publicKey) return;
+  async function emitReceipt() {
+    setErr('');
+    setSig('');
+
+    if (!publicKey) {
+      setErr('Connect a wallet to emit a devnet receipt (optional).');
+      return;
+    }
 
     try {
       setBusy(true);
@@ -109,8 +117,8 @@ export default function LessonPage() {
         lessonId,
         lessonTitle: lesson.title,
         score: 100,
-        xp: updated2.xp,
-        version: 'mvp-v2',
+        xp: state.xp,
+        version: 'mvp-v3-optional',
       };
       const ix = new TransactionInstruction({
         programId: MEMO_PROGRAM_ID,
@@ -172,7 +180,8 @@ export default function LessonPage() {
           </aside>
 
           <section className="lg:col-span-8 rounded-3xl border border-black/10 bg-white/60 p-5 backdrop-blur-xl">
-            <div className="space-y-2">{renderMd(lesson.content.md)}</div>
+            <LessonAnimation lessonId={lessonId} />
+            <div className="mt-5 space-y-2">{renderMd(lesson.content.md)}</div>
 
             {lesson.content.callouts?.length ? (
               <div className="mt-5 grid grid-cols-1 gap-3">
@@ -265,9 +274,22 @@ export default function LessonPage() {
                 </button>
               </div>
 
+              <div className="mt-4 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+                <div className="text-xs text-black/50">
+                  Optional: you can emit a devnet receipt (writes a Memo). Learning progress works without it.
+                </div>
+                <button
+                  onClick={emitReceipt}
+                  disabled={busy || !publicKey || !allSubmitted || !allCorrect}
+                  className="rounded-full border border-black/10 bg-white/55 px-4 py-2 text-sm font-extrabold hover:bg-white disabled:opacity-50"
+                >
+                  {busy ? 'Emitting…' : 'Emit devnet receipt'}
+                </button>
+              </div>
+
               {sig ? (
-                <div className="mt-4 rounded-2xl border border-black/10 bg-white/55 px-4 py-3">
-                  <div className="text-xs text-black/50">On-chain receipt (devnet)</div>
+                <div className="mt-3 rounded-2xl border border-black/10 bg-white/55 px-4 py-3">
+                  <div className="text-xs text-black/50">Receipt signature (devnet)</div>
                   <a className="text-emerald-800 hover:underline break-all font-mono text-sm" href={solscan(sig)} target="_blank" rel="noreferrer">
                     {sig}
                   </a>
