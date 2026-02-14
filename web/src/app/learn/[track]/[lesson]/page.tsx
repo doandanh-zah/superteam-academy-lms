@@ -232,8 +232,12 @@ export default function LessonPage() {
                         <button
                           key={ch.id}
                           onClick={() => {
-                            if (submitted) return;
+                            // allow changing answer after submission; require re-submit
+                            setErr('');
                             setAnswers((p) => ({ ...p, [q.id]: ch.id }));
+                            if (submittedQ[q.id]) {
+                              setSubmittedQ((p) => ({ ...p, [q.id]: false }));
+                            }
                           }}
                           className={`w-full text-left p-3 rounded-xl border cursor-pointer transition-all flex items-center ${cls}`}
                         >
