@@ -34,3 +34,20 @@ body::before {
 code, pre, textarea {
   font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
+
+/* Wallet adapter button mobile scaling */
+.wallet-adapter-button {
+  border-radius: 9999px !important;
+  height: 44px !important;
+  line-height: 44px !important;
+  padding: 0 14px !important;
+  font-weight: 800 !important;
+  font-family: var(--font-display), ui-sans-serif, system-ui !important;
+}
+
+@media (max-width: 420px) {
+  .wallet-adapter-button {
+    transform: scale(0.92);
+    transform-origin: top right;
+  }
+}

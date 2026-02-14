@@ -5,14 +5,6 @@ import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 
 import { TRACKS, firstLessonId } from '@/lib/curriculum';
 
-function Pill({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/90 backdrop-blur">
-      {children}
-    </span>
-  );
-}
-
 export default function Home() {
   return (
     <main className="min-h-screen">

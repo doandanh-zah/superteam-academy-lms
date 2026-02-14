@@ -160,11 +160,11 @@ export default function LessonPage() {
                 <Link
                   key={l.id}
                   href={`/learn/${track}/${l.id}`}
-                  className={`block rounded-2xl border border-white/10 px-4 py-3 transition ${l.id===lessonId ? 'bg-white/10' : 'bg-black/20 hover:bg-white/10'}`}
+                  className={`block rounded-2xl border border-black/10 px-4 py-3 transition ${l.id===lessonId ? 'bg-black/5' : 'bg-white/50 hover:bg-white'}`}
                 >
                   <div className="flex items-center justify-between gap-3">
                     <div className="font-extrabold text-sm">{l.title}</div>
-                    <div className="text-xs text-white/50">{l.minutes}m</div>
+                    <div className="text-xs text-black/50">{l.minutes}m</div>
                   </div>
                 </Link>
               ))}
@@ -177,9 +177,9 @@ export default function LessonPage() {
             {lesson.content.callouts?.length ? (
               <div className="mt-5 grid grid-cols-1 gap-3">
                 {lesson.content.callouts.map((c) => (
-                  <div key={c.title} className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
+                  <div key={c.title} className="rounded-2xl border border-black/10 bg-white/55 px-4 py-3">
                     <div className="font-black">{c.title}</div>
-                    <div className="mt-1 text-sm text-white/70">{c.body}</div>
+                    <div className="mt-1 text-sm text-black/70">{c.body}</div>
                   </div>
                 ))}
               </div>
@@ -249,10 +249,10 @@ export default function LessonPage() {
               <div className="mt-4 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
                 <div className="flex gap-2">
                   {prev ? (
-                    <Link className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm hover:bg-white/10" href={`/learn/${track}/${prev.id}`}>← Prev</Link>
+                    <Link className="rounded-full border border-black/10 bg-white/50 px-4 py-2 text-sm hover:bg-white" href={`/learn/${track}/${prev.id}`}>← Prev</Link>
                   ) : null}
                   {next ? (
-                    <Link className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm hover:bg-white/10" href={`/learn/${track}/${next.id}`}>Next →</Link>
+                    <Link className="rounded-full border border-black/10 bg-white/50 px-4 py-2 text-sm hover:bg-white" href={`/learn/${track}/${next.id}`}>Next →</Link>
                   ) : null}
                 </div>
 
@@ -266,16 +266,16 @@ export default function LessonPage() {
               </div>
 
               {sig ? (
-                <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
-                  <div className="text-xs text-white/50">On-chain receipt (devnet)</div>
-                  <a className="text-[#FFD700] hover:underline break-all font-mono text-sm" href={solscan(sig)} target="_blank" rel="noreferrer">
+                <div className="mt-4 rounded-2xl border border-black/10 bg-white/55 px-4 py-3">
+                  <div className="text-xs text-black/50">On-chain receipt (devnet)</div>
+                  <a className="text-emerald-800 hover:underline break-all font-mono text-sm" href={solscan(sig)} target="_blank" rel="noreferrer">
                     {sig}
                   </a>
                 </div>
               ) : null}
 
               {err ? (
-                <div className="mt-4 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-red-200 text-sm break-words">
+                <div className="mt-4 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-red-950 text-sm break-words">
                   {err}
                 </div>
               ) : null}
@@ -283,7 +283,7 @@ export default function LessonPage() {
           </section>
         </div>
 
-        <footer className="mt-10 text-xs text-white/40">
+        <footer className="mt-10 text-xs text-black/50">
           Tip: connect wallet to write a devnet completion receipt. Progress is stored locally per wallet.
         </footer>
       </div>
