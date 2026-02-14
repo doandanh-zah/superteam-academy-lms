@@ -3,6 +3,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import ProcessingAnimation from '@/components/animations/ProcessingAnimation';
+import ComputerFlow from '@/components/animations/ComputerFlow';
+import ConsensusStepper from '@/components/animations/ConsensusStepper';
+import AccountModel from '@/components/animations/AccountModel';
+import PromptFlow from '@/components/animations/PromptFlow';
 
 type Props = { lessonId: string };
 
@@ -99,10 +103,12 @@ function Stepper({ steps, step, setStep }: { steps: StepInfo[]; step: number; se
 }
 
 export default function LessonAnimation({ lessonId }: Props) {
-  // Phase 2: for some modules we fully embed upstream-style GSAP animations as dedicated components.
-  if (lessonId === 'm2-identity-and-authentication') {
-    return <ProcessingAnimation />;
-  }
+  // Phase 2: embed upstream-style animations as dedicated components.
+  if (lessonId === 'm1-blockchain-as-a-computer') return <ComputerFlow />;
+  if (lessonId === 'm2-identity-and-authentication') return <ProcessingAnimation />;
+  if (lessonId === 'm3-consensus-input-not-memory') return <ConsensusStepper />;
+  if (lessonId === 'm4-account-file' || lessonId === 'm5-program-library') return <AccountModel />;
+  if (lessonId === 'm7-coding-with-claude') return <PromptFlow />;
 
   const [playing, setPlaying] = useState(true);
   const [resetTick, setResetTick] = useState(0);
