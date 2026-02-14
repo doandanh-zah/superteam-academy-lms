@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { gsap } from 'gsap';
+import ProcessingAnimation from '@/components/animations/ProcessingAnimation';
 
 type Props = { lessonId: string };
 
@@ -98,6 +99,11 @@ function Stepper({ steps, step, setStep }: { steps: StepInfo[]; step: number; se
 }
 
 export default function LessonAnimation({ lessonId }: Props) {
+  // Phase 2: for some modules we fully embed upstream-style GSAP animations as dedicated components.
+  if (lessonId === 'm2-identity-and-authentication') {
+    return <ProcessingAnimation />;
+  }
+
   const [playing, setPlaying] = useState(true);
   const [resetTick, setResetTick] = useState(0);
   const [mode, setMode] = useState<'client-server' | 'p2p'>('client-server');
