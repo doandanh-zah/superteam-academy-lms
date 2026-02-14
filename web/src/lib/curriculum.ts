@@ -22,7 +22,8 @@ export type Lesson = {
 };
 
 // Roadmap inspiration:
-// https://superteamvn.substack.com/p/solana-developer-journey
+// - Official beginner outline: https://github.com/Lab-Blueprint/Solana-Rapid-Fire-Beginner-101
+// - Developer journey: https://superteamvn.substack.com/p/solana-developer-journey
 export const TRACKS: { id: TrackId; title: string; subtitle: string }[] = [
   {
     id: 'genin',
@@ -32,19 +33,23 @@ export const TRACKS: { id: TrackId; title: string; subtitle: string }[] = [
   {
     id: 'chunin',
     title: 'Chunin (Builder)',
-    subtitle: 'Complex apps, Anchor patterns, CPI, compute budget, production mindset',
+    subtitle: 'Build real apps: Anchor, CPI, compute budget, architecture, debugging, security basics',
   },
   {
     id: 'jonin',
     title: 'Jonin (Expert)',
-    subtitle: 'Advanced optimization, protocol-level understanding, security, leadership',
+    subtitle: 'Performance, security/auditing mindset, protocol-level understanding, leadership',
   },
 ];
 
+// Helper to generate choices quickly
+function choice(id: string, label: string): QuizChoice {
+  return { id, label };
+}
+
 // --- GENIN (Beginner) ---
-// Based on the official-style outline from:
-// https://github.com/Lab-Blueprint/Solana-Rapid-Fire-Beginner-101 (docs/module-outline.md)
-export const LESSONS: Lesson[] = [
+// Based on the official-style outline from Lab-Blueprint Rapid-Fire Beginner 101.
+const GENIN: Lesson[] = [
   {
     id: 'm1-blockchain-as-a-computer',
     track: 'genin',
@@ -60,7 +65,6 @@ Not “a database”, not “a website”, but a machine where **many independen
 **Client-server (web2)**
 - One server (or one company) owns the database.
 - That server decides what is true.
-- If the server goes down or changes rules, the system changes.
 
 **Peer-to-peer replication (web3)**
 - Transactions are broadcast.
@@ -71,76 +75,31 @@ Not “a database”, not “a website”, but a machine where **many independen
 It matters when you need:
 - **credible neutrality** (no single admin can rewrite outcomes)
 - **public verifiability** (anyone can check)
-- coordination between parties who don’t fully trust each other
 
 ## What you pay for
 You trade speed and simplicity for:
 - fees
 - stricter rules
 - more engineering discipline
-
-That’s why blockchains are not for every app — they’re for the apps where trust and neutrality are worth the cost.
 `,
     },
     quiz: [
       {
         id: 'q1',
         prompt: 'Which architecture is centralized?',
-        choices: [
-          { id: 'a', label: 'Client-server' },
-          { id: 'b', label: 'Peer-to-peer replication' },
-          { id: 'c', label: 'Many independent validators enforcing rules' },
-        ],
+        choices: [choice('a', 'Client-server'), choice('b', 'Peer-to-peer replication'), choice('c', 'Many independent validators enforcing rules')],
         correctChoiceId: 'a',
-        explanation: 'Client-server has a central authority that controls data and availability.',
+        explanation: 'Client-server has a central authority controlling data and availability.',
       },
       {
         id: 'q2',
-        prompt: 'Why does peer-to-peer replication reduce single points of failure?',
-        choices: [
-          { id: 'a', label: 'Because any single node can fail and the network still continues' },
-          { id: 'b', label: 'Because it uses fewer computers' },
-          { id: 'c', label: 'Because it removes cryptography' },
-        ],
+        prompt: 'Why does P2P reduce single points of failure?',
+        choices: [choice('a', 'Replication across many nodes'), choice('b', 'No cryptography needed'), choice('c', 'It uses fewer machines')],
         correctChoiceId: 'a',
-        explanation: 'Replication means the system doesn’t depend on one machine or one organization.',
-      },
-      {
-        id: 'q3',
-        prompt: 'What makes a blockchain more than a distributed database?',
-        choices: [
-          { id: 'a', label: 'It always stores images and files' },
-          { id: 'b', label: 'It has verifiable execution rules enforced by independent validators' },
-          { id: 'c', label: 'It can never have outages' },
-        ],
-        correctChoiceId: 'b',
-        explanation: 'The key feature is verifiable rule enforcement under adversarial assumptions.',
-      },
-      {
-        id: 'q4',
-        prompt: 'What is the main tradeoff of decentralization?',
-        choices: [
-          { id: 'a', label: 'More coordination cost and complexity' },
-          { id: 'b', label: 'No need for fees' },
-          { id: 'c', label: 'Unlimited throughput' },
-        ],
-        correctChoiceId: 'a',
-        explanation: 'Replacing a single admin with many actors costs time, fees, and complexity.',
-      },
-      {
-        id: 'q5',
-        prompt: 'Blockchains are most useful when…',
-        choices: [
-          { id: 'a', label: 'You control all participants and trust is not a concern' },
-          { id: 'b', label: 'You need shared truth between parties who don’t fully trust each other' },
-          { id: 'c', label: 'You need a private database only' },
-        ],
-        correctChoiceId: 'b',
-        explanation: 'The value comes from shared truth and neutral coordination without one owner.',
+        explanation: 'Replication avoids dependence on one server/provider.',
       },
     ],
   },
-
   {
     id: 'm2-identity-and-authentication',
     track: 'genin',
@@ -152,98 +111,32 @@ That’s why blockchains are not for every app — they’re for the apps where 
 In web3, a wallet is a **portable identity**.
 Instead of “login with password”, you usually **sign a message**.
 
-## Keypairs (what they are)
-A wallet has:
-- **private key** (secret): used to sign
-- **public key** (address): used to verify
+## Keypairs
+- **private key** signs
+- **public key** verifies
 
-If you can sign, you prove you control the private key.
-
-## “Login” vs “Sign”
-**Login (web2):**
-- Server checks your password.
-- If password database leaks, users are exposed.
-
-**Sign (web3):**
-- App gives you a message to sign.
-- Anyone can verify the signature.
-- No password database is required.
-
-## What actually happens in practice
-A typical flow:
-1) App builds a message/tx
-2) Wallet shows approval UI
-3) User signs
-4) Signature is verified
-5) Validators execute the instructions
-
-## RPC nodes (gateways)
-Your app talks to an RPC node to:
-- fetch chain data
-- submit transactions
-
-But RPC nodes aren’t “the chain”. If everyone relies on a few RPCs, user access becomes centralized.
+## RPC nodes
+Your app usually talks to an RPC to read data and submit transactions.
+RPC is a *gateway*, not the chain itself.
 `,
     },
     quiz: [
       {
         id: 'q1',
         prompt: 'What does a signature prove?',
-        choices: [
-          { id: 'a', label: 'That the transaction is guaranteed to succeed' },
-          { id: 'b', label: 'That a private key approved the message' },
-          { id: 'c', label: 'That the RPC node is trusted' },
-        ],
+        choices: [choice('a', 'RPC is trusted'), choice('b', 'Private key approved the message'), choice('c', 'Transaction will succeed')],
         correctChoiceId: 'b',
-        explanation: 'Signatures prove approval by the private key holder; execution success is separate.',
+        explanation: 'Signatures prove approval, not success.',
       },
       {
         id: 'q2',
         prompt: 'Which key verifies a signature?',
-        choices: [
-          { id: 'a', label: 'Private key' },
-          { id: 'b', label: 'Public key' },
-          { id: 'c', label: 'Blockhash' },
-        ],
+        choices: [choice('a', 'Private key'), choice('b', 'Public key'), choice('c', 'Blockhash')],
         correctChoiceId: 'b',
-        explanation: 'Verification uses the signer’s public key.',
-      },
-      {
-        id: 'q3',
-        prompt: 'Why is key generation off-chain?',
-        choices: [
-          { id: 'a', label: 'Because private keys must remain secret; generating locally reduces leakage risk' },
-          { id: 'b', label: 'Because validators generate wallets for you' },
-          { id: 'c', label: 'Because signatures are optional' },
-        ],
-        correctChoiceId: 'a',
-        explanation: 'Private keys must be secret; local generation keeps them out of shared systems.',
-      },
-      {
-        id: 'q4',
-        prompt: 'What is an RPC node in simple terms?',
-        choices: [
-          { id: 'a', label: 'A wallet that signs for you' },
-          { id: 'b', label: 'A gateway that relays requests and serves chain data' },
-          { id: 'c', label: 'A smart contract' },
-        ],
-        correctChoiceId: 'b',
-        explanation: 'RPC nodes are access points; they’re not the source of truth (validators are).',
-      },
-      {
-        id: 'q5',
-        prompt: 'Signing a message is best described as…',
-        choices: [
-          { id: 'a', label: 'A cryptographic approval that can be verified by anyone' },
-          { id: 'b', label: 'A UI animation with no real meaning' },
-          { id: 'c', label: 'A replacement for blockhash' },
-        ],
-        correctChoiceId: 'a',
-        explanation: 'Signing creates a cryptographic proof of approval.',
+        explanation: 'Verification uses the public key.',
       },
     ],
   },
-
   {
     id: 'm3-consensus-input-not-memory',
     track: 'genin',
@@ -252,87 +145,20 @@ But RPC nodes aren’t “the chain”. If everyone relies on a few RPCs, user a
     content: {
       md: `# Consensus (Input, Not Memory)
 
-A common misconception: consensus is not “shared RAM”.
 Consensus is mainly agreement on **transaction ordering** (inputs).
-
-## The core idea
-- Users submit transactions.
-- Validators agree on the order.
-- The chain’s state is the output of applying those ordered inputs.
-
-If you agree on ordering, you can replay and reproduce the same state.
-
-## Node roles
-- **Validators:** verify + execute, produce blocks.
-- **RPC nodes:** access layer for apps.
-- **Light clients:** verify with minimal data.
-
-## Practical risk: RPC centralization
-Even if validators are decentralized, if most apps rely on 1–3 RPC providers:
-- outages affect most users
-- throttling/censorship becomes practical
-- the “user experience layer” centralizes
+If you agree on ordering, and execution is deterministic, you reproduce the same resulting state.
 `,
     },
     quiz: [
       {
         id: 'q1',
-        prompt: 'What does consensus primarily agree on?',
-        choices: [
-          { id: 'a', label: 'The order of transactions (inputs)' },
-          { id: 'b', label: 'The UI design of wallets' },
-          { id: 'c', label: 'The private keys of users' },
-        ],
+        prompt: 'Consensus primarily agrees on…',
+        choices: [choice('a', 'Transaction order'), choice('b', 'Wallet UI'), choice('c', 'Private keys')],
         correctChoiceId: 'a',
-        explanation: 'Consensus is about ordering inputs so everyone can derive the same results.',
-      },
-      {
-        id: 'q2',
-        prompt: 'Why can relying on a few RPCs be risky?',
-        choices: [
-          { id: 'a', label: 'It centralizes user access, increasing outage/censorship impact' },
-          { id: 'b', label: 'It makes signatures invalid' },
-          { id: 'c', label: 'It removes account ownership rules' },
-        ],
-        correctChoiceId: 'a',
-        explanation: 'Centralized access points create chokepoints even if the chain is decentralized.',
-      },
-      {
-        id: 'q3',
-        prompt: 'Validators are responsible for…',
-        choices: [
-          { id: 'a', label: 'Executing transactions and enforcing protocol rules' },
-          { id: 'b', label: 'Designing NFTs' },
-          { id: 'c', label: 'Storing your private key' },
-        ],
-        correctChoiceId: 'a',
-        explanation: 'Validators enforce the rules and execute the state transitions.',
-      },
-      {
-        id: 'q4',
-        prompt: 'If you have the same ordered inputs and deterministic execution, you get…',
-        choices: [
-          { id: 'a', label: 'The same resulting state' },
-          { id: 'b', label: 'No need for fees' },
-          { id: 'c', label: 'Infinite throughput' },
-        ],
-        correctChoiceId: 'a',
-        explanation: 'Determinism + same ordered inputs → same state.',
-      },
-      {
-        id: 'q5',
-        prompt: 'Consensus is best described as agreement on…',
-        choices: [
-          { id: 'a', label: 'A canonical transaction history' },
-          { id: 'b', label: 'A single database admin' },
-          { id: 'c', label: 'A password reset process' },
-        ],
-        correctChoiceId: 'a',
-        explanation: 'Consensus produces a canonical history that everyone can verify.',
+        explanation: 'It’s about canonical ordering of inputs.',
       },
     ],
   },
-
   {
     id: 'm4-account-file',
     track: 'genin',
@@ -341,32 +167,25 @@ Even if validators are decentralized, if most apps rely on 1–3 RPC providers:
     content: {
       md: `# Account = File
 
-On Solana, an account is like a **file** with metadata.
-It contains both value (lamports) and optionally structured data.
+Accounts are “files” with fields:
+- **lamports**
+- **data**
+- **owner**
+- **executable**
 
-## Account fields (high level)
-- **lamports:** balance
-- **data:** bytes (your app state)
-- **owner:** program id allowed to write the data
-- **executable:** whether this account is a program
-
-## Ownership rule (critical)
-Only the program listed as the account’s **owner** can modify its **data**.
-Anyone can read it.
-
-## Rent and rent-exemption
-Accounts take storage space.
-To keep accounts from being reclaimed, many apps make them **rent-exempt** (hold a minimum lamports balance).
-
-## Why code and data are separate
-Programs are shared code.
-State lives in accounts.
-This makes the model composable: many users can call the same program with different accounts.
+Only the **owner program** can write account **data**.
 `,
     },
-    quiz: [],
+    quiz: [
+      {
+        id: 'q1',
+        prompt: 'Who can modify an account’s data?',
+        choices: [choice('a', 'Anyone'), choice('b', 'Only the owner program'), choice('c', 'Only the RPC')],
+        correctChoiceId: 'b',
+        explanation: 'Writes are constrained by the owner program.',
+      },
+    ],
   },
-
   {
     id: 'm5-program-library',
     track: 'genin',
@@ -375,34 +194,22 @@ This makes the model composable: many users can call the same program with diffe
     content: {
       md: `# Program = Library
 
-A Solana program is like a **shared library**.
-Many users call the same code, but each user’s state lives in separate accounts.
+Programs are shared code. They are effectively stateless; state lives in accounts.
 
-## Stateless execution
-Programs do not hold state in memory between calls.
-Every instruction:
-- receives accounts
-- reads/writes account data
-- returns an outcome
-
-That means all important state must be in accounts — and all constraints must be validated every time.
-
-## PDAs (Program Derived Addresses)
-A PDA is a deterministic address derived from:
-- program id
-- seeds
-- bump
-
-A PDA:
-- is controlled by the program logic
-- cannot be created from a private key
-
-Use PDAs for deterministic state (config, profiles, escrow vaults).
+## PDAs
+A PDA is derived from seeds + program id and is controlled by program logic (not a private key).
 `,
     },
-    quiz: [],
+    quiz: [
+      {
+        id: 'q1',
+        prompt: 'Where does persistent state live on Solana?',
+        choices: [choice('a', 'Inside programs'), choice('b', 'In accounts'), choice('c', 'In the wallet UI')],
+        correctChoiceId: 'b',
+        explanation: 'Programs are stateless; accounts store state.',
+      },
+    ],
   },
-
   {
     id: 'm6-environment-setup-minimal',
     track: 'genin',
@@ -411,32 +218,23 @@ Use PDAs for deterministic state (config, profiles, escrow vaults).
     content: {
       md: `# Environment Setup (Minimal)
 
-You have two good paths.
+Two paths:
+- Fast: Solana Playground
+- Local: Rust + Solana CLI + Node.js + Anchor
 
-## Fast path: Solana Playground
-If your goal is learning concepts fast:
-- zero setup
-- instant iteration
-
-Downside: it’s not identical to professional local dev.
-
-## Local minimal setup (for building)
-A typical minimal local toolchain:
-- **Rust** toolchain (build programs)
-- **Solana CLI** (keypairs, clusters, airdrops)
-- **Node.js** (clients + scripts)
-- **Anchor** (framework to reduce boilerplate)
-
-## Practical strategy
-Start in Playground until you understand the model.
-Switch to local setup when you start shipping.
-
-Don’t over-install first. Your goal is a working loop: build → test → iterate.
+Goal: get a build/test loop working before installing everything.
 `,
     },
-    quiz: [],
+    quiz: [
+      {
+        id: 'q1',
+        prompt: 'Which toolchain typically compiles Solana programs?',
+        choices: [choice('a', 'Rust toolchain'), choice('b', 'Solscan'), choice('c', 'Wallet adapter')],
+        correctChoiceId: 'a',
+        explanation: 'Most Solana programs are written in Rust.',
+      },
+    ],
   },
-
   {
     id: 'm7-coding-with-claude',
     track: 'genin',
@@ -445,71 +243,606 @@ Don’t over-install first. Your goal is a working loop: build → test → iter
     content: {
       md: `# Coding with Claude
 
-AI can speed up Solana development — if you control it with structure.
-The danger is not that the code won’t compile; the danger is that it compiles while missing critical security checks.
+AI helps, but only if you use structure.
 
-## The 4-part prompt
-A high-quality prompt includes:
-1) **Context:** repo structure, existing accounts, constraints
-2) **Goal:** what to build
-3) **Constraints:** security checks, patterns, network, error handling
-4) **Acceptance criteria:** tests, expected behavior, edge cases
-
-## Example mini-project: “Wall of Wishes”
-A clean beginner project might include:
-- one global counter (tracks total wishes)
-- one PDA per user wish (deterministic storage)
-
-## Testing mindset
-Tests should cover:
-- signer checks (who is allowed)
-- PDA derivation (seeds + bump)
-- ownership checks
-- invariants (no negative balances, no invalid state)
-
-If the AI can’t explain the invariants and threat model, the feature isn’t ready.
+A strong prompt includes:
+1) **Context**
+2) **Goal**
+3) **Constraints** (security checks)
+4) **Acceptance criteria** (tests)
 `,
+      callouts: [
+        {
+          title: 'Discussion',
+          body: 'Before you build: write your idea + constraints. A good place to discuss and refine: https://gimmeidea.com',
+        },
+      ],
     },
-    quiz: [],
-  },
-
-  // --- CHUNIN / JONIN placeholders (coming soon) ---
-  {
-    id: 'coming-soon',
-    track: 'chunin',
-    title: 'Coming soon: Chunin curriculum',
-    minutes: 3,
-    content: {
-      md: `# Chunin (Builder) — Coming soon
-
-We will build this track from the **Solana Developer Journey** roadmap:
-- deeper Anchor
-- CPI
-- compute budget & fees
-- architecture patterns
-- production debugging + security mindset
-`,
-    },
-    quiz: [],
-  },
-  {
-    id: 'coming-soon',
-    track: 'jonin',
-    title: 'Coming soon: Jonin curriculum',
-    minutes: 3,
-    content: {
-      md: `# Jonin (Expert) — Coming soon
-
-We will build this track from the roadmap:
-- protocol-level topics
-- optimization & performance
-- security/auditing
-- ecosystem leadership
-`,
-    },
-    quiz: [],
+    quiz: [
+      {
+        id: 'q1',
+        prompt: 'Which prompt structure is best for safe code?',
+        choices: [choice('a', 'Vague idea only'), choice('b', 'Context + goal + constraints + acceptance'), choice('c', 'Only stack')],
+        correctChoiceId: 'b',
+        explanation: 'This reduces hallucination and forces safety constraints.',
+      },
+    ],
   },
 ];
+
+// --- CHUNIN (Builder) ---
+// Target: 8 quiz questions per module.
+const CHUNIN: Lesson[] = [
+  {
+    id: 'c1-anchor-and-account-design',
+    track: 'chunin',
+    title: 'Chunin 1: Anchor & Account Design Patterns',
+    minutes: 18,
+    content: {
+      md: `# Anchor & Account Design Patterns
+
+At Chunin level, you stop thinking “write a program” and start thinking “design a **state model**”.
+
+## Core skills
+- account model: what lives where, who owns it, who can write
+- PDAs and stable seed schemes
+- constraints and invariants (checked **every** instruction)
+
+## Patterns
+- **Config PDA**: global settings owned by program
+- **User profile PDA**: per-user state
+- **Vault PDA**: authority controlled by program logic
+
+## Common pitfalls
+- forgetting ownership checks
+- writable accounts passed by attacker
+- seed collisions (non-stable seeds)
+
+## Checklist before shipping
+- signer checks
+- ownership checks
+- PDA validation (seeds + bump)
+- invariants on every instruction
+
+> Discussion: post your account model + invariants and get feedback: https://gimmeidea.com
+`,
+    },
+    quiz: [
+      {
+        id: 'q1',
+        prompt: 'Why should invariants be enforced on every instruction (not only init)?',
+        choices: [choice('a', 'Because clients can bypass UI and call instructions directly'), choice('b', 'Because Anchor requires it'), choice('c', 'Because RPC caches state')],
+        correctChoiceId: 'a',
+        explanation: 'Attackers can call instructions with crafted accounts; invariants must hold always.',
+      },
+      {
+        id: 'q2',
+        prompt: 'A good PDA seed scheme is…',
+        choices: [choice('a', 'Random every time'), choice('b', 'Stable prefixes + deterministic user identifiers'), choice('c', 'Depends on UI theme')],
+        correctChoiceId: 'b',
+        explanation: 'Stability prevents collisions and makes accounts predictable.',
+      },
+      {
+        id: 'q3',
+        prompt: 'What does an ownership check protect against?',
+        choices: [choice('a', 'RPC outages'), choice('b', 'Writing to attacker-controlled accounts'), choice('c', 'Low SOL balance')],
+        correctChoiceId: 'b',
+        explanation: 'Without ownership checks, a program can be tricked into mutating wrong state.',
+      },
+      {
+        id: 'q4',
+        prompt: 'Which account type is best for global settings?',
+        choices: [choice('a', 'Config PDA'), choice('b', 'Any random wallet'), choice('c', 'Instruction data only')],
+        correctChoiceId: 'a',
+        explanation: 'A config PDA is deterministic and owned by the program.',
+      },
+      {
+        id: 'q5',
+        prompt: 'Why are writable accounts “dangerous”?',
+        choices: [choice('a', 'They cost more rent always'), choice('b', 'They allow state mutation; must be validated'), choice('c', 'They disable signatures')],
+        correctChoiceId: 'b',
+        explanation: 'Writable means mutable state → attack surface.',
+      },
+      {
+        id: 'q6',
+        prompt: 'Anchor constraints help by…',
+        choices: [choice('a', 'Replacing all security checks'), choice('b', 'Automating validation of PDAs/owners/signers'), choice('c', 'Reducing fees')],
+        correctChoiceId: 'b',
+        explanation: 'Constraints reduce boilerplate but do not remove the need for threat modeling.',
+      },
+      {
+        id: 'q7',
+        prompt: 'A vault PDA is typically used to…',
+        choices: [choice('a', 'Store UI settings'), choice('b', 'Control escrowed assets via program logic'), choice('c', 'Act as an RPC proxy')],
+        correctChoiceId: 'b',
+        explanation: 'Vaults are controlled by program-derived authority and rules.',
+      },
+      {
+        id: 'q8',
+        prompt: 'What is the best mental model for a Solana program?',
+        choices: [choice('a', 'A shared library invoked with explicit accounts'), choice('b', 'A background server with memory'), choice('c', 'A centralized database')],
+        correctChoiceId: 'a',
+        explanation: 'Programs are stateless and operate on provided accounts.',
+      },
+    ],
+  },
+  {
+    id: 'c2-cpi-and-composability',
+    track: 'chunin',
+    title: 'Chunin 2: CPI, Signed CPI, and Composability',
+    minutes: 18,
+    content: {
+      md: `# CPI, Signed CPI, and Composability
+
+CPI (Cross-Program Invocation) is “calling another program”.
+This is what makes Solana composable.
+
+## Useful distinctions
+- **unsigned CPI**: you call another program without signing as a PDA
+- **signed CPI**: your program proves authority over a PDA via seeds + bump
+
+## Risks
+- confused-deputy problems (signing for the wrong accounts)
+- passing attacker-controlled accounts into CPI
+
+## Checklist
+- validate all accounts passed to CPI
+- validate that the PDA you sign for is the expected one
+
+> Discussion: share a CPI flow diagram you designed: https://gimmeidea.com
+`,
+      callouts: [
+        { title: 'Animation note', body: 'This is one of the places where an animation is useful (CPI flow + signer authority). We will add it later.' },
+      ],
+    },
+    quiz: [
+      {
+        id: 'q1',
+        prompt: 'What is CPI?',
+        choices: [choice('a', 'Cross-Program Invocation'), choice('b', 'Compute Price Index'), choice('c', 'Client Program Interface')],
+        correctChoiceId: 'a',
+        explanation: 'CPI = calling another program from within a program.',
+      },
+      {
+        id: 'q2',
+        prompt: 'When do you need signed CPI?',
+        choices: [choice('a', 'When the program must act as authority for a PDA'), choice('b', 'Whenever you call RPC'), choice('c', 'For reading account data')],
+        correctChoiceId: 'a',
+        explanation: 'Signed CPI proves PDA authority via seeds + bump.',
+      },
+      {
+        id: 'q3',
+        prompt: 'What is a confused-deputy risk in CPI?',
+        choices: [choice('a', 'RPC throttling'), choice('b', 'Your program signs for unintended accounts'), choice('c', 'Too many signatures')],
+        correctChoiceId: 'b',
+        explanation: 'If you sign for the wrong PDA/accounts, you can be exploited.',
+      },
+      {
+        id: 'q4',
+        prompt: 'Best practice before CPI?',
+        choices: [choice('a', 'Validate all accounts used by the CPI target'), choice('b', 'Skip checks because target program checks'), choice('c', 'Only validate payer')],
+        correctChoiceId: 'a',
+        explanation: 'Never assume the called program will protect you from wrong inputs.',
+      },
+      {
+        id: 'q5',
+        prompt: 'Signed CPI uses what to prove PDA authority?',
+        choices: [choice('a', 'Password'), choice('b', 'Seeds + bump'), choice('c', 'RPC key')],
+        correctChoiceId: 'b',
+        explanation: 'Seeds+bump let runtime sign for PDA.',
+      },
+      {
+        id: 'q6',
+        prompt: 'Composability mainly means…',
+        choices: [choice('a', 'Programs can be reused together like Lego'), choice('b', 'Everything is centralized'), choice('c', 'No fees')],
+        correctChoiceId: 'a',
+        explanation: 'Apps compose by invoking shared programs.',
+      },
+      {
+        id: 'q7',
+        prompt: 'If an attacker can choose accounts in your CPI, what can happen?',
+        choices: [choice('a', 'Nothing'), choice('b', 'Funds/state can be redirected'), choice('c', 'Blockhash disappears')],
+        correctChoiceId: 'b',
+        explanation: 'Account substitution is a common exploit pattern.',
+      },
+      {
+        id: 'q8',
+        prompt: 'Unsigned CPI still requires…',
+        choices: [choice('a', 'No validation'), choice('b', 'Account validation + correct program ids'), choice('c', 'Airdrop')],
+        correctChoiceId: 'b',
+        explanation: 'You must validate accounts and program ids regardless.',
+      },
+    ],
+  },
+  {
+    id: 'c3-compute-budget-fees',
+    track: 'chunin',
+    title: 'Chunin 3: Fees, Compute Budget, and Transaction Reliability',
+    minutes: 18,
+    content: {
+      md: `# Fees, Compute Budget, and Transaction Reliability
+
+At builder level you must care about reliability:
+- transaction size
+- compute limit
+- prioritization fees
+
+## What you pay for
+- base fee
+- compute budget / priority fee (if you add it)
+- rent-exempt balances for accounts
+
+## Debugging mindset
+When users report "it failed":
+- reproduce on devnet
+- inspect logs
+- identify failure class (budget / account / signer / blockhash)
+
+> Discussion: post a failure log + your hypothesis: https://gimmeidea.com
+`,
+      callouts: [
+        { title: 'Animation note', body: 'Compute budget + tx lifecycle is one of the few places where an animation helps; we’ll add later.' },
+      ],
+    },
+    quiz: [
+      {
+        id: 'q1',
+        prompt: 'Why might a transaction fail during congestion even if logic is correct?',
+        choices: [choice('a', 'Blockhash expiration / prioritization'), choice('b', 'Because signatures become invalid'), choice('c', 'Because PDAs change')],
+        correctChoiceId: 'a',
+        explanation: 'Validity window + prioritization affect landing.',
+      },
+      {
+        id: 'q2',
+        prompt: 'Rent-exemption mainly affects…',
+        choices: [choice('a', 'Account persistence/creation cost'), choice('b', 'Wallet UI theme'), choice('c', 'Consensus rules')],
+        correctChoiceId: 'a',
+        explanation: 'Accounts need minimum lamports to remain allocated.',
+      },
+      {
+        id: 'q3',
+        prompt: 'Compute budget instructions are used to…',
+        choices: [choice('a', 'Increase compute limit / set priority fee'), choice('b', 'Generate PDAs'), choice('c', 'Verify signatures')],
+        correctChoiceId: 'a',
+        explanation: 'They control compute limits and priority fees.',
+      },
+      {
+        id: 'q4',
+        prompt: 'Best first step when debugging a failed tx?',
+        choices: [choice('a', 'Guess'), choice('b', 'Read logs and identify failure class'), choice('c', 'Increase UI padding')],
+        correctChoiceId: 'b',
+        explanation: 'Logs show the failure reason and program errors.',
+      },
+      {
+        id: 'q5',
+        prompt: '“Blockhash not found” usually means…',
+        choices: [choice('a', 'Your tx is too old; fetch new blockhash'), choice('b', 'Your wallet is hacked'), choice('c', 'RPC is always wrong')],
+        correctChoiceId: 'a',
+        explanation: 'Recent blockhash has an expiry window.',
+      },
+      {
+        id: 'q6',
+        prompt: 'Priority fees are mainly used to…',
+        choices: [choice('a', 'Speed up inclusion during congestion'), choice('b', 'Change owner of accounts'), choice('c', 'Remove rent')],
+        correctChoiceId: 'a',
+        explanation: 'They improve tx inclusion probability.',
+      },
+      {
+        id: 'q7',
+        prompt: 'A good reliability posture includes…',
+        choices: [choice('a', 'Retries + idempotency where possible'), choice('b', 'No error handling'), choice('c', 'Only UI validation')],
+        correctChoiceId: 'a',
+        explanation: 'Network conditions fluctuate; code should handle retries safely.',
+      },
+      {
+        id: 'q8',
+        prompt: 'Fees are paid in…',
+        choices: [choice('a', 'SOL'), choice('b', 'USDC always'), choice('c', 'Not paid')],
+        correctChoiceId: 'a',
+        explanation: 'Solana fees are paid in SOL.',
+      },
+    ],
+  },
+  {
+    id: 'c4-case-study-program-account-relationships',
+    track: 'chunin',
+    title: 'Chunin 4: Case Study — Program/Account Relationships (NFTs & AMMs)',
+    minutes: 20,
+    content: {
+      md: `# Case Study — Program/Account Relationships (NFTs & AMMs)
+
+Chunin-level growth comes from reading *real systems*.
+
+## What to practice
+- Draw the **account graph** (which accounts exist, and how they link)
+- Identify which program owns which state
+- Identify which instructions write which accounts
+
+## Example prompts
+- How many accounts does an NFT mint touch (metadata, mint, token account, edition…)?
+- How many accounts does an AMM pool touch (vaults, LP mint, config, observation…) ?
+
+## Deliverable
+Make a diagram. If you can’t draw it, you don’t understand it.
+
+> Discussion: share your diagram and get feedback: https://gimmeidea.com
+`,
+    },
+    quiz: [
+      {
+        id: 'q1',
+        prompt: 'Why draw an account graph?',
+        choices: [choice('a', 'To understand state, authority, and write locks'), choice('b', 'To pick fonts'), choice('c', 'To avoid signatures')],
+        correctChoiceId: 'a',
+        explanation: 'It reveals state relationships and attack surface.',
+      },
+      {
+        id: 'q2',
+        prompt: 'A key question in any protocol integration is…',
+        choices: [choice('a', 'Which accounts are writable and why'), choice('b', 'Which emoji to use'), choice('c', 'Which RPC is coolest')],
+        correctChoiceId: 'a',
+        explanation: 'Writable accounts are the mutation surface.',
+      },
+      {
+        id: 'q3',
+        prompt: 'Reading production code mainly helps you learn…',
+        choices: [choice('a', 'Real constraints and patterns'), choice('b', 'How to skip testing'), choice('c', 'How to avoid docs')],
+        correctChoiceId: 'a',
+        explanation: 'Production systems encode battle-tested patterns.',
+      },
+      {
+        id: 'q4',
+        prompt: 'Account relationships matter most because…',
+        choices: [choice('a', 'They define who can change what state'), choice('b', 'They define UI layout'), choice('c', 'They define seed length')],
+        correctChoiceId: 'a',
+        explanation: 'Authority and write-access live in account relationships.',
+      },
+      {
+        id: 'q5',
+        prompt: 'In integrations, a frequent bug class is…',
+        choices: [choice('a', 'Account substitution / wrong account passed'), choice('b', 'Too many headings'), choice('c', 'Wrong background color')],
+        correctChoiceId: 'a',
+        explanation: 'Attackers can pass wrong accounts unless validated.',
+      },
+      {
+        id: 'q6',
+        prompt: 'If an instruction writes to state, it must have…',
+        choices: [choice('a', 'Writable account flag'), choice('b', 'A PNG'), choice('c', 'A token name')],
+        correctChoiceId: 'a',
+        explanation: 'Writes require writable accounts.',
+      },
+      {
+        id: 'q7',
+        prompt: 'A good diagram should include…',
+        choices: [choice('a', 'Owners and authorities'), choice('b', 'Only colors'), choice('c', 'Only titles')],
+        correctChoiceId: 'a',
+        explanation: 'Owner/authority define mutation rights.',
+      },
+      {
+        id: 'q8',
+        prompt: 'The output of this module should be…',
+        choices: [choice('a', 'A concrete account graph diagram'), choice('b', 'A tweet'), choice('c', 'A new private key')],
+        correctChoiceId: 'a',
+        explanation: 'The diagram is the proof of understanding.',
+      },
+    ],
+  },
+];
+
+// --- JONIN (Expert) ---
+// Target: 6 quiz questions per module.
+const JONIN: Lesson[] = [
+  {
+    id: 'j1-performance-and-parallelism',
+    track: 'jonin',
+    title: 'Jonin 1: Performance, Parallelism, and Write Locks',
+    minutes: 18,
+    content: {
+      md: `# Performance, Parallelism, and Write Locks
+
+At Jonin level, you think in terms of throughput and contention.
+
+## Core model
+- transactions can run in parallel if they do not contend on writable accounts
+- account design influences parallelism
+
+## Practical outcomes
+- design state so hot accounts are avoided
+- split state (sharding) when needed
+
+> Discussion: share a redesign proposal for a “hot account” problem: https://gimmeidea.com
+`,
+      callouts: [
+        { title: 'Animation', body: 'Parallelism and write locks is one of the few places where animation is useful. We can add later.' },
+      ],
+    },
+    quiz: [
+      {
+        id: 'q1',
+        prompt: 'Why do hot writable accounts reduce throughput?',
+        choices: [choice('a', 'They force serialization due to write locks'), choice('b', 'They remove signatures'), choice('c', 'They increase font size')],
+        correctChoiceId: 'a',
+        explanation: 'Write locks prevent parallel execution.',
+      },
+      {
+        id: 'q2',
+        prompt: 'A common fix for contention is…',
+        choices: [choice('a', 'Sharding/splitting state'), choice('b', 'Adding more bold text'), choice('c', 'Using more RPCs')],
+        correctChoiceId: 'a',
+        explanation: 'Reduce contention by splitting state across accounts.',
+      },
+      {
+        id: 'q3',
+        prompt: 'Parallel execution is primarily gated by…',
+        choices: [choice('a', 'Writability overlap'), choice('b', 'Wallet brand'), choice('c', 'Domain name')],
+        correctChoiceId: 'a',
+        explanation: 'Overlapping writable accounts cause conflicts.',
+      },
+      {
+        id: 'q4',
+        prompt: 'Best mental model: Solana is like…',
+        choices: [choice('a', 'A parallel computer with explicit locks'), choice('b', 'A single-threaded app always'), choice('c', 'A spreadsheet')],
+        correctChoiceId: 'a',
+        explanation: 'Account locks define concurrency.',
+      },
+      {
+        id: 'q5',
+        prompt: 'To maximize parallelism, you should…',
+        choices: [choice('a', 'Minimize shared writable accounts'), choice('b', 'Maximize shared writable accounts'), choice('c', 'Avoid PDAs')],
+        correctChoiceId: 'a',
+        explanation: 'Less shared writability → more parallelism.',
+      },
+      {
+        id: 'q6',
+        prompt: 'Why does account design matter for performance?',
+        choices: [choice('a', 'It determines contention and lock scope'), choice('b', 'It determines UI color'), choice('c', 'It determines blockhash')],
+        correctChoiceId: 'a',
+        explanation: 'Account layout drives concurrency.',
+      },
+    ],
+  },
+  {
+    id: 'j2-security-auditing-mindset',
+    track: 'jonin',
+    title: 'Jonin 2: Security & Auditing Mindset',
+    minutes: 18,
+    content: {
+      md: `# Security & Auditing Mindset
+
+At Jonin level, your job is to be paranoid *correctly*.
+
+## Threat model basics
+- attacker controls client
+- attacker chooses accounts unless validated
+- attacker can replay strategies across instructions
+
+## Common failure classes
+- missing signer checks
+- missing ownership checks
+- missing PDA validation
+- logic bugs in invariants (e.g. balances)
+
+## Audit checklist
+- authority model
+- invariants per instruction
+- CPI flows and signer authority
+- account substitution vectors
+`,
+    },
+    quiz: [
+      {
+        id: 'q1',
+        prompt: 'In on-chain threat models, the attacker controls…',
+        choices: [choice('a', 'The client and inputs'), choice('b', 'Validator private keys'), choice('c', 'Your program binary')],
+        correctChoiceId: 'a',
+        explanation: 'Assume adversarial clients and crafted accounts.',
+      },
+      {
+        id: 'q2',
+        prompt: 'Most important rule in Solana programs?',
+        choices: [choice('a', 'Never trust client-provided accounts without validation'), choice('b', 'Always use gradients'), choice('c', 'Always sign every step')],
+        correctChoiceId: 'a',
+        explanation: 'Validation is the core defense.',
+      },
+      {
+        id: 'q3',
+        prompt: 'A confused-deputy exploit often involves…',
+        choices: [choice('a', 'Signing for the wrong accounts/authority'), choice('b', 'Wrong font choice'), choice('c', 'Too many headings')],
+        correctChoiceId: 'a',
+        explanation: 'Authority misuse is the key risk.',
+      },
+      {
+        id: 'q4',
+        prompt: 'Invariants must be checked…',
+        choices: [choice('a', 'On every relevant instruction'), choice('b', 'Only on init'), choice('c', 'Only in UI')],
+        correctChoiceId: 'a',
+        explanation: 'Attackers can skip init paths.',
+      },
+      {
+        id: 'q5',
+        prompt: 'Ownership checks ensure…',
+        choices: [choice('a', 'Your program writes only to expected program-owned state'), choice('b', 'RPC is fast'), choice('c', 'Fees are 0')],
+        correctChoiceId: 'a',
+        explanation: 'They prevent writing to malicious accounts.',
+      },
+      {
+        id: 'q6',
+        prompt: 'A good audit includes reviewing…',
+        choices: [choice('a', 'CPI flows and signer authority'), choice('b', 'Only UI copy'), choice('c', 'Only README')],
+        correctChoiceId: 'a',
+        explanation: 'CPI and authority are major sources of exploits.',
+      },
+    ],
+  },
+  {
+    id: 'j3-protocol-level-learning',
+    track: 'jonin',
+    title: 'Jonin 3: Protocol-Level Learning Path',
+    minutes: 16,
+    content: {
+      md: `# Protocol-Level Learning Path
+
+This is where you become dangerous (in a good way).
+
+## What to focus on
+- read docs + spec-level material
+- follow core engineering discussions
+- build intuition about bottlenecks
+
+## Practical activities
+- read native program behavior (system, token)
+- trace a complex transaction end-to-end
+- benchmark and profile
+`,
+    },
+    quiz: [
+      {
+        id: 'q1',
+        prompt: 'A protocol-level builder should prioritize…',
+        choices: [choice('a', 'Reading specs + tracing real transactions'), choice('b', 'Only copying code'), choice('c', 'Only watching price')],
+        correctChoiceId: 'a',
+        explanation: 'Understanding comes from specs + traces + measurement.',
+      },
+      {
+        id: 'q2',
+        prompt: 'Benchmarking helps you…',
+        choices: [choice('a', 'Measure bottlenecks and validate optimizations'), choice('b', 'Avoid logs'), choice('c', 'Skip tests')],
+        correctChoiceId: 'a',
+        explanation: 'Optimization without measurement is guessing.',
+      },
+      {
+        id: 'q3',
+        prompt: 'Tracing a tx end-to-end includes…',
+        choices: [choice('a', 'Accounts + instructions + logs'), choice('b', 'Only UI'), choice('c', 'Only token name')],
+        correctChoiceId: 'a',
+        explanation: 'You need the full execution context.',
+      },
+      {
+        id: 'q4',
+        prompt: 'Native programs are important because…',
+        choices: [choice('a', 'Many apps depend on them; they define core behavior'), choice('b', 'They set website colors'), choice('c', 'They remove fees')],
+        correctChoiceId: 'a',
+        explanation: 'They’re the foundation of the ecosystem.',
+      },
+      {
+        id: 'q5',
+        prompt: '“Optimize” without profiling is…',
+        choices: [choice('a', 'Risky; you may optimize the wrong thing'), choice('b', 'Always correct'), choice('c', 'Free')],
+        correctChoiceId: 'a',
+        explanation: 'Profile first.',
+      },
+      {
+        id: 'q6',
+        prompt: 'Protocol-level work often involves…',
+        choices: [choice('a', 'Tradeoffs and constraints'), choice('b', 'No tradeoffs'), choice('c', 'Only UI')],
+        correctChoiceId: 'a',
+        explanation: 'Every change has costs.',
+      },
+    ],
+  },
+];
+
+export const LESSONS: Lesson[] = [...GENIN, ...CHUNIN, ...JONIN];
 
 export function lessonsByTrack(track: TrackId): Lesson[] {
   return LESSONS.filter((l) => l.track === track);
