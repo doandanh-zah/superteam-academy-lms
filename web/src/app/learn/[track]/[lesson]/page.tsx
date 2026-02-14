@@ -57,8 +57,10 @@ export default function LessonPage() {
   const quizPassed = isQuizPassed(state, track, lessonId);
 
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [submitted, setSubmitted] = useState(false);
 
-  function grade() {
+  function grade() {  
+
     const incorrect: string[] = [];
     for (const q of lesson.quiz) {
       if (answers[q.id] !== q.correctChoiceId) incorrect.push(q.id);
@@ -69,10 +71,11 @@ export default function LessonPage() {
   async function submitQuiz() {
     setErr('');
     setSig('');
+    setSubmitted(true);
 
     const g = grade();
     if (!g.ok) {
-      setErr('Some answers are incorrect. Review explanations and try again.');
+      setErr('Some answers are incorrect. Correct answers are highlighted in green; wrong selections in red.');
       return;
     }
 
@@ -182,12 +185,26 @@ export default function LessonPage() {
                     <div className="font-bold">{q.prompt}</div>
                     <div className="mt-2 grid grid-cols-1 gap-2">
                       {q.choices.map((ch) => {
-                        const active = answers[q.id] === ch.id;
+                        const selected = answers[q.id] === ch.id;
+                        const isCorrect = ch.id === q.correctChoiceId;
+                        const show = submitted;
+
+                        const cls = (() => {
+                          if (!show) return selected ? 'bg-white/10' : 'bg-white/5 hover:bg-white/10';
+                          if (selected && isCorrect) return 'bg-emerald-500/20 border-emerald-500/30 text-emerald-100';
+                          if (selected && !isCorrect) return 'bg-red-500/15 border-red-500/30 text-red-100';
+                          if (!selected && isCorrect) return 'bg-emerald-500/10 border-emerald-500/20 text-emerald-100/90';
+                          return 'bg-white/5';
+                        })();
+
                         return (
                           <button
                             key={ch.id}
-                            onClick={() => setAnswers((p) => ({ ...p, [q.id]: ch.id }))}
-                            className={`text-left rounded-2xl border border-white/10 px-3 py-2 text-sm transition ${active ? 'bg-white/10' : 'bg-white/5 hover:bg-white/10'}`}
+                            onClick={() => {
+                              setSubmitted(false);
+                              setAnswers((p) => ({ ...p, [q.id]: ch.id }));
+                            }}
+                            className={`text-left rounded-2xl border border-white/10 px-3 py-2 text-sm transition ${cls}`}
                           >
                             {ch.label}
                           </button>
@@ -195,6 +212,15 @@ export default function LessonPage() {
                       })}
                     </div>
                     <div className="mt-2 text-xs text-white/50">Explanation: {q.explanation}</div>
+                    {submitted ? (
+                      <div className="mt-2 text-xs">
+                        {answers[q.id] === q.correctChoiceId ? (
+                          <span className="text-emerald-200">Correct</span>
+                        ) : (
+                          <span className="text-red-200">Incorrect</span>
+                        )}
+                      </div>
+                    ) : null}
                   </div>
                 ))}
               </div>
