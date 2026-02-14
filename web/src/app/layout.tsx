@@ -14,8 +14,8 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Superteam Academy — LMS dApp (MVP)",
-  description: "A production-grade Solana learning platform prototype: courses, progress, gamification, and on-chain credentials.",
+  title: "dsuc-academy",
+  description: "dsuc-academy — Solana learning platform (Genin → Chunin → Jonin).",
 };
 
 export default function RootLayout({

@@ -16,7 +16,7 @@ export default function Home() {
       <div className="relative mx-auto max-w-6xl px-5 py-10">
         <header className="flex items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl sm:text-4xl font-black tracking-tight">Superteam Academy</h1>
+            <h1 className="text-3xl sm:text-4xl font-black tracking-tight">dsuc-academy</h1>
             <p className="text-black/60 mt-1">Pick your level. Then open modules inside.</p>
           </div>
           <div className="flex items-center justify-end">
