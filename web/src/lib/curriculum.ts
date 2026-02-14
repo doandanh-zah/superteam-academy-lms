@@ -627,6 +627,183 @@ Make a diagram. If you can’t draw it, you don’t understand it.
       },
     ],
   },
+  {
+    id: 'c5-fullstack-architecture',
+    track: 'chunin',
+    title: 'Chunin 5: Full-stack Architecture (On-chain + Off-chain)',
+    minutes: 20,
+    content: {
+      md: `# Full-stack Architecture (On-chain + Off-chain)
+
+Chunin builders ship systems, not just programs.
+
+## A practical architecture
+- On-chain program(s): state transitions + authority
+- Off-chain service: indexing, caching, notifications, analytics
+- Frontend: wallet UX, retries, idempotency
+
+## Key design decisions
+- What must be on-chain vs off-chain?
+- What is the source of truth?
+- How do you handle retries safely?
+
+## Reliability checklist
+- idempotent operations where possible
+- safe retries (don’t double-spend)
+- consistent error handling UX
+
+> Discussion: post your app idea + architecture diagram for review: https://gimmeidea.com
+`,
+    },
+    quiz: [
+      {
+        id: 'q1',
+        prompt: 'What should generally be the on-chain “source of truth”?',
+        choices: [choice('a', 'Validated state transitions and ownership rules'), choice('b', 'UI preferences'), choice('c', 'RPC cache')],
+        correctChoiceId: 'a',
+        explanation: 'On-chain is for verifiable state transitions and authority.',
+      },
+      {
+        id: 'q2',
+        prompt: 'Why do off-chain indexers exist?',
+        choices: [choice('a', 'To make query UX fast and developer-friendly'), choice('b', 'To replace consensus'), choice('c', 'To store private keys')],
+        correctChoiceId: 'a',
+        explanation: 'Raw chain queries can be slow/complex for product UX.',
+      },
+      {
+        id: 'q3',
+        prompt: 'A safe retry strategy must avoid…',
+        choices: [choice('a', 'Double execution of non-idempotent actions'), choice('b', 'Logging'), choice('c', 'Using TypeScript')],
+        correctChoiceId: 'a',
+        explanation: 'Retries can accidentally execute the same effect twice.',
+      },
+      {
+        id: 'q4',
+        prompt: 'Which is a good rule for “what goes on-chain”?',
+        choices: [choice('a', 'Things that require trustless verification'), choice('b', 'Everything'), choice('c', 'Only CSS')],
+        correctChoiceId: 'a',
+        explanation: 'Put trust boundaries and critical state on-chain.',
+      },
+      {
+        id: 'q5',
+        prompt: 'If users report intermittent failures, you should first…',
+        choices: [choice('a', 'Reproduce and inspect logs to classify failure'), choice('b', 'Ignore'), choice('c', 'Change theme')],
+        correctChoiceId: 'a',
+        explanation: 'Classify failures before applying fixes.',
+      },
+      {
+        id: 'q6',
+        prompt: 'A good client should show…',
+        choices: [choice('a', 'Clear error messages + next action'), choice('b', 'Only “failed”'), choice('c', 'Nothing')],
+        correctChoiceId: 'a',
+        explanation: 'UX matters for reliability; guide the user.',
+      },
+      {
+        id: 'q7',
+        prompt: 'Idempotency helps because…',
+        choices: [choice('a', 'Repeated requests don’t cause repeated side effects'), choice('b', 'It removes fees'), choice('c', 'It avoids signatures')],
+        correctChoiceId: 'a',
+        explanation: 'Idempotency is a core reliability pattern.',
+      },
+      {
+        id: 'q8',
+        prompt: 'An architecture diagram should include…',
+        choices: [choice('a', 'Components + data flow + trust boundaries'), choice('b', 'Only logos'), choice('c', 'Only colors')],
+        correctChoiceId: 'a',
+        explanation: 'The point is understanding flow and boundaries.',
+      },
+    ],
+  },
+  {
+    id: 'c6-testing-debugging-security-basics',
+    track: 'chunin',
+    title: 'Chunin 6: Testing, Debugging, and Security Basics',
+    minutes: 20,
+    content: {
+      md: `# Testing, Debugging, and Security Basics
+
+At Chunin level, you must build a tight loop:
+**write → test → debug → harden**.
+
+## What to test
+- signer checks
+- ownership checks
+- PDA derivation
+- invariants
+- CPI flows (accounts + signer authority)
+
+## Debugging workflow
+- reproduce on devnet/localnet
+- inspect program logs
+- isolate minimal failing case
+
+## Security basics
+Assume an attacker:
+- controls the client
+- controls accounts passed to instructions
+
+> Discussion: post a bug report (symptoms + logs + hypothesis) for review: https://gimmeidea.com
+`,
+    },
+    quiz: [
+      {
+        id: 'q1',
+        prompt: 'Why is UI validation insufficient for security?',
+        choices: [choice('a', 'Attackers can call instructions directly'), choice('b', 'Because UI is slow'), choice('c', 'Because wallets are centralized')],
+        correctChoiceId: 'a',
+        explanation: 'Programs must treat clients as adversarial.',
+      },
+      {
+        id: 'q2',
+        prompt: 'The most valuable tests for a Solana program focus on…',
+        choices: [choice('a', 'Authority + invariants'), choice('b', 'Fonts'), choice('c', 'RPC branding')],
+        correctChoiceId: 'a',
+        explanation: 'Most exploits come from missing checks and invariant failures.',
+      },
+      {
+        id: 'q3',
+        prompt: 'A minimal failing case helps because…',
+        choices: [choice('a', 'It isolates root cause quickly'), choice('b', 'It increases compute'), choice('c', 'It changes seeds')],
+        correctChoiceId: 'a',
+        explanation: 'Smaller repro → faster diagnosis.',
+      },
+      {
+        id: 'q4',
+        prompt: 'Logs are most useful to…',
+        choices: [choice('a', 'Identify failing instruction and error reason'), choice('b', 'Choose colors'), choice('c', 'Avoid signatures')],
+        correctChoiceId: 'a',
+        explanation: 'Logs show where and why things failed.',
+      },
+      {
+        id: 'q5',
+        prompt: 'A common exploit vector is…',
+        choices: [choice('a', 'Account substitution (wrong accounts passed)'), choice('b', 'Too many quizzes'), choice('c', 'Long markdown')],
+        correctChoiceId: 'a',
+        explanation: 'Validate accounts and ownership.',
+      },
+      {
+        id: 'q6',
+        prompt: 'When debugging, you should first…',
+        choices: [choice('a', 'Classify failure: signer/ownership/PDA/budget/blockhash'), choice('b', 'Refactor UI'), choice('c', 'Redeploy')],
+        correctChoiceId: 'a',
+        explanation: 'Classification makes fixes systematic.',
+      },
+      {
+        id: 'q7',
+        prompt: 'Which check prevents writing to attacker-owned state?',
+        choices: [choice('a', 'Ownership check'), choice('b', 'Airdrop'), choice('c', 'Compute budget')],
+        correctChoiceId: 'a',
+        explanation: 'Ownership constrains write authority.',
+      },
+      {
+        id: 'q8',
+        prompt: 'A “secure by default” program means…',
+        choices: [choice('a', 'It fails closed when inputs are wrong'), choice('b', 'It ignores checks'), choice('c', 'It hides errors')],
+        correctChoiceId: 'a',
+        explanation: 'Invalid inputs should be rejected safely.',
+      },
+    ],
+  },
 ];
 
 // --- JONIN (Expert) ---
@@ -837,6 +1014,218 @@ This is where you become dangerous (in a good way).
         choices: [choice('a', 'Tradeoffs and constraints'), choice('b', 'No tradeoffs'), choice('c', 'Only UI')],
         correctChoiceId: 'a',
         explanation: 'Every change has costs.',
+      },
+    ],
+  },
+  {
+    id: 'j4-rpc-infra-and-observability',
+    track: 'jonin',
+    title: 'Jonin 4: RPC, Infra, and Observability',
+    minutes: 18,
+    content: {
+      md: `# RPC, Infra, and Observability
+
+At expert level, you treat RPC and infra as part of the product.
+
+## Why it matters
+- most failures users see are *infra failures* (timeouts, dropped tx, stale data)
+- centralization often happens at the RPC layer
+
+## What to build into your app
+- structured logs and correlation ids
+- retries with backoff
+- circuit breakers / fallback RPCs
+- metrics: success rate, latency, error classes
+
+## Debug playbook
+- classify: network vs program error vs wallet error
+- reproduce on devnet/localnet
+- compare RPC providers
+
+> Discussion: share your reliability/observability checklist: https://gimmeidea.com
+`,
+    },
+    quiz: [
+      {
+        id: 'q1',
+        prompt: 'Most user-facing failures in web3 apps are often…',
+        choices: [choice('a', 'Infra/RPC related'), choice('b', 'Font related'), choice('c', 'Always consensus failures')],
+        correctChoiceId: 'a',
+        explanation: 'Timeouts, dropped tx, and RPC issues are common.',
+      },
+      {
+        id: 'q2',
+        prompt: 'A good retry strategy includes…',
+        choices: [choice('a', 'Backoff and idempotency awareness'), choice('b', 'Infinite tight loops'), choice('c', 'No logging')],
+        correctChoiceId: 'a',
+        explanation: 'Retries must be safe and measured.',
+      },
+      {
+        id: 'q3',
+        prompt: 'Circuit breakers are used to…',
+        choices: [choice('a', 'Stop hammering a failing dependency'), choice('b', 'Increase compute'), choice('c', 'Derive PDAs')],
+        correctChoiceId: 'a',
+        explanation: 'They prevent cascading failures.',
+      },
+      {
+        id: 'q4',
+        prompt: 'Observability means…',
+        choices: [choice('a', 'Logs, metrics, traces that explain behavior'), choice('b', 'More animations'), choice('c', 'More wallets')],
+        correctChoiceId: 'a',
+        explanation: 'You need insight into runtime behavior.',
+      },
+      {
+        id: 'q5',
+        prompt: 'A key decentralization risk for users is…',
+        choices: [choice('a', 'Too few RPC providers'), choice('b', 'Too many accounts'), choice('c', 'Too much markdown')],
+        correctChoiceId: 'a',
+        explanation: 'Access-layer centralization creates chokepoints.',
+      },
+      {
+        id: 'q6',
+        prompt: 'A debugging playbook should first…',
+        choices: [choice('a', 'Classify error class'), choice('b', 'Change UI'), choice('c', 'Blame users')],
+        correctChoiceId: 'a',
+        explanation: 'Classification narrows the search space.',
+      },
+    ],
+  },
+  {
+    id: 'j5-advanced-security-cpi-audits',
+    track: 'jonin',
+    title: 'Jonin 5: Advanced Security — CPI & Authority Audits',
+    minutes: 18,
+    content: {
+      md: `# Advanced Security — CPI & Authority Audits
+
+Many high-impact exploits happen at authority boundaries.
+
+## What to audit deeply
+- signer authority model
+- PDA signing (seeds/bump correctness)
+- CPI target program id checks
+- account substitution vectors
+- re-entrancy style issues (logical, not EVM-style)
+
+## Practical technique
+For each instruction:
+- list required invariants
+- list attacker-controlled inputs
+- list what becomes writable
+
+> Discussion: post one instruction and its invariants for peer review: https://gimmeidea.com
+`,
+    },
+    quiz: [
+      {
+        id: 'q1',
+        prompt: 'A high-risk area in Solana programs is…',
+        choices: [choice('a', 'Authority boundaries and CPI'), choice('b', 'Typography'), choice('c', 'NFT art')],
+        correctChoiceId: 'a',
+        explanation: 'Authority misuse and CPI account substitution are common exploit paths.',
+      },
+      {
+        id: 'q2',
+        prompt: 'Before doing a CPI, you should always validate…',
+        choices: [choice('a', 'Target program id and all accounts passed'), choice('b', 'Only the payer'), choice('c', 'Only the UI input')],
+        correctChoiceId: 'a',
+        explanation: 'Don’t allow account/program substitution.',
+      },
+      {
+        id: 'q3',
+        prompt: 'Signed CPI is dangerous if…',
+        choices: [choice('a', 'You sign for an unintended PDA'), choice('b', 'You add markdown'), choice('c', 'You use devnet')],
+        correctChoiceId: 'a',
+        explanation: 'Signing is authority; mistakes can be fatal.',
+      },
+      {
+        id: 'q4',
+        prompt: 'An audit should focus on…',
+        choices: [choice('a', 'Invariants + writable accounts'), choice('b', 'Only performance'), choice('c', 'Only design')],
+        correctChoiceId: 'a',
+        explanation: 'Most exploits are invariant failures or write misuse.',
+      },
+      {
+        id: 'q5',
+        prompt: 'Account substitution means…',
+        choices: [choice('a', 'Attacker supplies different accounts than intended'), choice('b', 'Changing fonts'), choice('c', 'RPC switching')],
+        correctChoiceId: 'a',
+        explanation: 'Validate accounts and their owners/PDAs.',
+      },
+      {
+        id: 'q6',
+        prompt: 'A good invariant is…',
+        choices: [choice('a', 'A statement that must always be true after instruction execution'), choice('b', 'A UI tooltip'), choice('c', 'A gradient')],
+        correctChoiceId: 'a',
+        explanation: 'Invariants formalize correctness.',
+      },
+    ],
+  },
+  {
+    id: 'j6-leadership-and-impact',
+    track: 'jonin',
+    title: 'Jonin 6: Leadership, Mentorship, and Ecosystem Impact',
+    minutes: 14,
+    content: {
+      md: `# Leadership, Mentorship, and Ecosystem Impact
+
+At the top level, your impact is not only code.
+
+## What changes
+- you mentor juniors and unblock teams
+- you define quality bars and review checklists
+- you communicate tradeoffs clearly
+
+## A practical leadership checklist
+- write docs that prevent repeated mistakes
+- enforce security checklists
+- lead postmortems without blame
+
+> Discussion: write a “quality bar” checklist and share it: https://gimmeidea.com
+`,
+    },
+    quiz: [
+      {
+        id: 'q1',
+        prompt: 'A Jonin-level engineer’s impact includes…',
+        choices: [choice('a', 'Mentoring and setting quality bars'), choice('b', 'Only shipping features'), choice('c', 'Only redesigning UI')],
+        correctChoiceId: 'a',
+        explanation: 'Leadership amplifies a team’s output and safety.',
+      },
+      {
+        id: 'q2',
+        prompt: 'A good postmortem should be…',
+        choices: [choice('a', 'Blameless and action-oriented'), choice('b', 'Only blaming'), choice('c', 'Hidden from the team')],
+        correctChoiceId: 'a',
+        explanation: 'Postmortems exist to prevent repeats.',
+      },
+      {
+        id: 'q3',
+        prompt: 'Review checklists matter because…',
+        choices: [choice('a', 'They reduce repeated classes of bugs'), choice('b', 'They increase fees'), choice('c', 'They replace testing')],
+        correctChoiceId: 'a',
+        explanation: 'Checklists encode lessons and reduce misses.',
+      },
+      {
+        id: 'q4',
+        prompt: 'Mentoring is valuable because…',
+        choices: [choice('a', 'It scales knowledge and reduces bottlenecks'), choice('b', 'It removes the need for docs'), choice('c', 'It changes blockhash')],
+        correctChoiceId: 'a',
+        explanation: 'A strong team is a multiplier.',
+      },
+      {
+        id: 'q5',
+        prompt: 'A clear quality bar should include…',
+        choices: [choice('a', 'Security, testing, UX, and reliability expectations'), choice('b', 'Only performance'), choice('c', 'Only design')],
+        correctChoiceId: 'a',
+        explanation: 'Quality bars are multidimensional.',
+      },
+      {
+        id: 'q6',
+        prompt: 'The best kind of expertise sharing is…',
+        choices: [choice('a', 'Docs, reviews, workshops, and reusable checklists'), choice('b', 'Keeping knowledge private'), choice('c', 'Only tweets')],
+        correctChoiceId: 'a',
+        explanation: 'Reusable knowledge raises the whole ecosystem.',
       },
     ],
   },
