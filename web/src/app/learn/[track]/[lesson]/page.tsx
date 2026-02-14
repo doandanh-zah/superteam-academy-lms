@@ -15,7 +15,7 @@ const MEMO_PROGRAM_ID = new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfc
 
 function Pill({ children }: { children: React.ReactNode }) {
   return (
-    <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/90 backdrop-blur">
+    <span className="inline-flex items-center rounded-full border border-black/10 bg-white/60 px-3 py-1 text-xs text-black/80 backdrop-blur">
       {children}
     </span>
   );
@@ -57,25 +57,37 @@ export default function LessonPage() {
   const quizPassed = isQuizPassed(state, track, lessonId);
 
   const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [submitted, setSubmitted] = useState(false);
+  const [submittedQ, setSubmittedQ] = useState<Record<string, boolean>>({});
 
-  function grade() {  
-
-    const incorrect: string[] = [];
-    for (const q of lesson.quiz) {
-      if (answers[q.id] !== q.correctChoiceId) incorrect.push(q.id);
-    }
-    return { ok: incorrect.length === 0, incorrect };
+  function isCorrect(qid: string): boolean {
+    const q = lesson.quiz.find((x) => x.id === qid);
+    if (!q) return false;
+    return answers[qid] === q.correctChoiceId;
   }
 
-  async function submitQuiz() {
+  const allSubmitted = lesson.quiz.every((q) => submittedQ[q.id]);
+  const allCorrect = lesson.quiz.every((q) => isCorrect(q.id));
+
+  async function submitQuestion(qid: string) {
     setErr('');
     setSig('');
-    setSubmitted(true);
+    setSubmittedQ((p) => ({ ...p, [qid]: true }));
+    if (!isCorrect(qid)) {
+      setErr('Incorrect answer highlighted in red. Fix it and resubmit.');
+    }
+  }
 
-    const g = grade();
-    if (!g.ok) {
-      setErr('Some answers are incorrect. Correct answers are highlighted in green; wrong selections in red.');
+  async function finishLesson() {
+    setErr('');
+    setSig('');
+
+    if (!allSubmitted) {
+      setErr('Submit each question first.');
+      return;
+    }
+
+    if (!allCorrect) {
+      setErr('Some answers are still incorrect. Correct answers are highlighted in green; wrong selections in red.');
       return;
     }
 
@@ -122,18 +134,12 @@ export default function LessonPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#07070B] text-white">
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -top-40 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-fuchsia-500/20 blur-3xl" />
-        <div className="absolute top-20 -left-40 h-[520px] w-[520px] rounded-full bg-cyan-400/20 blur-3xl" />
-        <div className="absolute bottom-0 right-0 h-[520px] w-[520px] rounded-full bg-yellow-300/10 blur-3xl" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.06)_1px,transparent_0)] [background-size:26px_26px] opacity-30" />
-      </div>
+    <main className="min-h-screen">
 
       <div className="relative mx-auto max-w-7xl px-5 py-8">
-        <header className="flex items-start justify-between gap-4">
+        <header className="flex items-center justify-between gap-4">
           <div>
-            <Link href="/" className="text-xs text-white/60 hover:text-white/90">← Back</Link>
+            <Link href="/" className="text-xs text-black/60 hover:text-black">← Back</Link>
             <h1 className="mt-2 text-2xl sm:text-3xl font-black tracking-tight">{lesson.title}</h1>
             <div className="mt-2 flex flex-wrap gap-2">
               <Pill>{TRACKS.find((t) => t.id === track)?.title || track}</Pill>
@@ -141,11 +147,13 @@ export default function LessonPage() {
               {quizPassed ? <Pill>Quiz passed</Pill> : <Pill>Quiz pending</Pill>}
             </div>
           </div>
-          <WalletMultiButton />
+          <div className="flex items-center justify-end">
+            <WalletMultiButton />
+          </div>
         </header>
 
         <div className="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <aside className="lg:col-span-4 rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
+          <aside className="lg:col-span-4 rounded-3xl border border-black/10 bg-white/60 p-5 backdrop-blur-xl">
             <div className="text-sm font-bold">Track lessons</div>
             <div className="mt-3 space-y-2">
               {list.map((l) => (
@@ -163,7 +171,7 @@ export default function LessonPage() {
             </div>
           </aside>
 
-          <section className="lg:col-span-8 rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
+          <section className="lg:col-span-8 rounded-3xl border border-black/10 bg-white/60 p-5 backdrop-blur-xl">
             <div className="space-y-2">{renderMd(lesson.content.md)}</div>
 
             {lesson.content.callouts?.length ? (
@@ -181,46 +189,59 @@ export default function LessonPage() {
               <div className="text-lg font-black">Quiz</div>
               <div className="mt-3 space-y-4">
                 {lesson.quiz.map((q) => (
-                  <div key={q.id} className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
-                    <div className="font-bold">{q.prompt}</div>
+                  <div key={q.id} className="rounded-2xl border border-black/10 bg-white/50 px-4 py-3">
+                    <div className="font-bold text-black">{q.prompt}</div>
                     <div className="mt-2 grid grid-cols-1 gap-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-black/50">Choose one answer</span>
+                        <button
+                          onClick={() => submitQuestion(q.id)}
+                          className="rounded-full bg-black/10 hover:bg-black/15 border border-black/10 px-3 py-1 text-xs font-bold"
+                        >
+                          Submit
+                        </button>
+                      </div>
                       {q.choices.map((ch) => {
                         const selected = answers[q.id] === ch.id;
                         const isCorrect = ch.id === q.correctChoiceId;
-                        const show = submitted;
+                        const show = !!submittedQ[q.id];
 
                         const cls = (() => {
-                          if (!show) return selected ? 'bg-white/10' : 'bg-white/5 hover:bg-white/10';
-                          if (selected && isCorrect) return 'bg-emerald-500/20 border-emerald-500/30 text-emerald-100';
-                          if (selected && !isCorrect) return 'bg-red-500/15 border-red-500/30 text-red-100';
-                          if (!selected && isCorrect) return 'bg-emerald-500/10 border-emerald-500/20 text-emerald-100/90';
-                          return 'bg-white/5';
+                          if (!show) return selected ? 'bg-black/10' : 'bg-white/50 hover:bg-white';
+                          if (selected && isCorrect) return 'bg-emerald-500/25 border-emerald-600/30 text-emerald-950';
+                          if (selected && !isCorrect) return 'bg-red-500/20 border-red-600/30 text-red-950';
+                          if (!selected && isCorrect) return 'bg-emerald-500/10 border-emerald-600/20 text-emerald-950/90';
+                          return 'bg-white/50';
                         })();
 
                         return (
                           <button
                             key={ch.id}
                             onClick={() => {
-                              setSubmitted(false);
+                              setSubmittedQ((p) => ({ ...p, [q.id]: false }));
                               setAnswers((p) => ({ ...p, [q.id]: ch.id }));
                             }}
-                            className={`text-left rounded-2xl border border-white/10 px-3 py-2 text-sm transition ${cls}`}
+                            className={`text-left rounded-2xl border border-black/10 px-3 py-2 text-sm transition ${cls}`}
                           >
                             {ch.label}
                           </button>
                         );
                       })}
                     </div>
-                    <div className="mt-2 text-xs text-white/50">Explanation: {q.explanation}</div>
-                    {submitted ? (
-                      <div className="mt-2 text-xs">
-                        {answers[q.id] === q.correctChoiceId ? (
-                          <span className="text-emerald-200">Correct</span>
-                        ) : (
-                          <span className="text-red-200">Incorrect</span>
-                        )}
-                      </div>
-                    ) : null}
+                    {submittedQ[q.id] ? (
+                      <>
+                        <div className="mt-2 text-xs">
+                          {answers[q.id] === q.correctChoiceId ? (
+                            <span className="text-emerald-700 font-bold">Correct</span>
+                          ) : (
+                            <span className="text-red-700 font-bold">Incorrect</span>
+                          )}
+                        </div>
+                        <div className="mt-2 text-xs text-black/60">Explanation: {q.explanation}</div>
+                      </>
+                    ) : (
+                      <div className="mt-2 text-xs text-black/40">Submit this question to see the explanation.</div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -236,11 +257,11 @@ export default function LessonPage() {
                 </div>
 
                 <button
-                  onClick={submitQuiz}
-                  disabled={busy}
-                  className="rounded-full bg-[#FFD700] text-black font-black px-5 py-2 disabled:opacity-50"
+                  onClick={finishLesson}
+                  disabled={busy || !allSubmitted || !allCorrect}
+                  className="rounded-full bg-emerald-600 text-white font-black px-5 py-2 disabled:opacity-50"
                 >
-                  {busy ? 'Submitting…' : 'Submit quiz'}
+                  {busy ? 'Finishing…' : 'Finish lesson'}
                 </button>
               </div>
 
