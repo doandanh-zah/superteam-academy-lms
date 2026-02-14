@@ -33,7 +33,8 @@ export default function LessonPage() {
 
   const walletKey = publicKey?.toBase58() || null;
   const [state, setState] = useState(() => loadProgress(walletKey));
-  const [busy, setBusy] = useState(false);
+  const [busyFinish, setBusyFinish] = useState(false);
+  const [busyEmit, setBusyEmit] = useState(false);
   const [sig, setSig] = useState('');
   const [err, setErr] = useState('');
 
@@ -89,6 +90,7 @@ export default function LessonPage() {
 
   async function finishLesson() {
     setErr('');
+    setSig('');
 
     if (!allSubmitted) {
       setErr('Submit each question first.');
@@ -100,11 +102,16 @@ export default function LessonPage() {
       return;
     }
 
-    // Free learning: purely local progress
-    const updated1 = markQuizPassed(state, track, lessonId);
-    const updated2 = markLessonComplete(updated1, track, lessonId);
-    setState(updated2);
-    saveProgress(walletKey, updated2);
+    try {
+      setBusyFinish(true);
+      // Free learning: purely local progress
+      const updated1 = markQuizPassed(state, track, lessonId);
+      const updated2 = markLessonComplete(updated1, track, lessonId);
+      setState(updated2);
+      saveProgress(walletKey, updated2);
+    } finally {
+      setBusyFinish(false);
+    }
   }
 
   async function emitReceipt() {
@@ -117,7 +124,7 @@ export default function LessonPage() {
     }
 
     try {
-      setBusy(true);
+      setBusyEmit(true);
       const payload = {
         kind: 'academy_lesson_completion_receipt',
         ts: new Date().toISOString(),
@@ -143,10 +150,19 @@ export default function LessonPage() {
       const tx = new VersionedTransaction(msg);
       const s = await sendTransaction(tx, connection);
       setSig(s);
+
+      // Optional receipt should also mark local progress as completed (same as Finish Lesson)
+      // so users don't feel like they have to press two buttons.
+      if (allSubmitted && allCorrect) {
+        const updated1 = markQuizPassed(state, track, lessonId);
+        const updated2 = markLessonComplete(updated1, track, lessonId);
+        setState(updated2);
+        saveProgress(walletKey, updated2);
+      }
     } catch (e: any) {
       setErr(e?.message || String(e));
     } finally {
-      setBusy(false);
+      setBusyEmit(false);
     }
   }
 
@@ -292,8 +308,8 @@ export default function LessonPage() {
                 ) : null}
               </div>
 
-              <Button onClick={finishLesson} disabled={busy || !allSubmitted || !allCorrect} variant="primary" size="sm">
-                {busy ? 'Finishing…' : 'Finish lesson'} <ArrowRight className="w-4 h-4 ml-1" />
+              <Button onClick={finishLesson} disabled={busyFinish || !allSubmitted || !allCorrect} variant="primary" size="sm">
+                {busyFinish ? 'Finishing…' : 'Finish lesson'} <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
             </div>
 
@@ -303,11 +319,11 @@ export default function LessonPage() {
               </div>
               <Button
                 onClick={emitReceipt}
-                disabled={busy || !publicKey || !allSubmitted || !allCorrect}
+                disabled={busyEmit || !publicKey || !allSubmitted || !allCorrect}
                 variant="outline"
                 size="sm"
               >
-                <Share2 className="w-3 h-3 mr-2" /> {busy ? 'Emitting…' : 'Emit devnet receipt'}
+                <Share2 className="w-3 h-3 mr-2" /> {busyEmit ? 'Emitting…' : 'Emit devnet receipt'}
               </Button>
             </div>
 
@@ -384,18 +400,18 @@ export default function LessonPage() {
             </div>
 
             <div className="space-y-3">
-              <Button fullWidth variant="primary" onClick={finishLesson} disabled={busy || !allSubmitted || !allCorrect}>
-                Finish Lesson
+              <Button fullWidth variant="primary" onClick={finishLesson} disabled={busyFinish || !allSubmitted || !allCorrect}>
+                {busyFinish ? 'Finishing…' : 'Finish Lesson'}
               </Button>
               <Button
                 fullWidth
                 variant="outline"
                 onClick={emitReceipt}
-                disabled={busy || !publicKey || !allSubmitted || !allCorrect}
+                disabled={busyEmit || !publicKey || !allSubmitted || !allCorrect}
                 className={!publicKey ? 'text-slate-500 border-slate-700 hover:bg-transparent cursor-not-allowed opacity-50' : ''}
                 title={!publicKey ? 'Connect wallet to emit receipt' : ''}
               >
-                <Share2 className="w-3 h-3 mr-2" /> Emit Devnet Receipt
+                <Share2 className="w-3 h-3 mr-2" /> {busyEmit ? 'Emitting…' : 'Emit Devnet Receipt'}
               </Button>
             </div>
           </Card>
