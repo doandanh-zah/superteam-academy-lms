@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { SolanaProviders } from "./providers";
+import { Layout } from "@/components/layout/Layout";
 
 const display = Space_Grotesk({
   variable: "--font-display",
@@ -26,7 +27,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${display.variable} ${mono.variable} antialiased`}>
-        <SolanaProviders>{children}</SolanaProviders>
+        <SolanaProviders>
+          <Layout>{children}</Layout>
+        </SolanaProviders>
       </body>
     </html>
   );

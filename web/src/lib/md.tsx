@@ -52,7 +52,7 @@ function renderInline(text: string): React.ReactNode {
       {tokens.map((t, idx) => {
         if (t.type === 'bold') return <strong key={idx} className="font-extrabold">{t.value}</strong>;
         if (t.type === 'italic') return <em key={idx} className="italic">{t.value}</em>;
-        if (t.type === 'code') return <code key={idx} className="rounded-md border border-black/10 bg-white/70 px-1 py-0.5 font-mono text-[0.95em]">{t.value}</code>;
+        if (t.type === 'code') return <code key={idx} className="rounded-md border border-white/10 bg-white/5 px-1 py-0.5 font-mono text-[0.95em] text-indigo-200">{t.value}</code>;
         return <React.Fragment key={idx}>{t.value}</React.Fragment>;
       })}
     </>
@@ -77,7 +77,7 @@ export function renderMd(md: string) {
       // consume closing ```
       i++;
       out.push(
-        <pre key={`code-${out.length}`} className="mt-3 rounded-2xl border border-black/10 bg-white/60 p-4 overflow-x-auto text-xs text-black">
+        <pre key={`code-${out.length}`} className="mt-3 rounded-2xl border border-white/10 bg-black/30 p-4 overflow-x-auto text-xs text-slate-200">
           <code>{buf.join('\n')}</code>
         </pre>
       );
@@ -86,7 +86,7 @@ export function renderMd(md: string) {
 
     if (line.startsWith('# ')) {
       out.push(
-        <h1 key={`h1-${out.length}`} className="text-2xl font-black tracking-tight text-black">
+        <h1 key={`h1-${out.length}`} className="text-2xl font-black tracking-tight text-white font-display">
           {renderInline(line.slice(2))}
         </h1>
       );
@@ -96,7 +96,7 @@ export function renderMd(md: string) {
 
     if (line.startsWith('## ')) {
       out.push(
-        <h2 key={`h2-${out.length}`} className="mt-6 text-lg font-extrabold text-black">
+        <h2 key={`h2-${out.length}`} className="mt-6 text-lg font-extrabold text-white font-display">
           {renderInline(line.slice(3))}
         </h2>
       );
@@ -111,7 +111,7 @@ export function renderMd(md: string) {
         i++;
       }
       out.push(
-        <ul key={`ul-${out.length}`} className="mt-3 list-disc pl-5 space-y-1 text-sm text-black/75">
+        <ul key={`ul-${out.length}`} className="mt-3 list-disc pl-5 space-y-1 text-sm text-slate-300">
           {items.map((t, idx) => (
             <li key={`${idx}-${t}`}>{renderInline(t)}</li>
           ))}
@@ -134,7 +134,7 @@ export function renderMd(md: string) {
     }
 
     out.push(
-      <p key={`p-${out.length}`} className="mt-3 text-sm leading-6 text-black/75">
+      <p key={`p-${out.length}`} className="mt-3 text-sm leading-6 text-slate-300">
         {renderInline(para.join(' '))}
       </p>
     );
