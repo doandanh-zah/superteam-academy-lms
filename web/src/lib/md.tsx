@@ -21,7 +21,7 @@ export function renderMd(md: string) {
       // consume closing ```
       i++;
       out.push(
-        <pre key={`code-${out.length}`} className="mt-3 rounded-2xl border border-white/10 bg-black/30 p-4 overflow-x-auto text-xs">
+        <pre key={`code-${out.length}`} className="mt-3 rounded-2xl border border-black/10 bg-white/60 p-4 overflow-x-auto text-xs text-black">
           <code>{buf.join('\n')}</code>
         </pre>
       );
@@ -30,7 +30,7 @@ export function renderMd(md: string) {
 
     if (line.startsWith('# ')) {
       out.push(
-        <h1 key={`h1-${out.length}`} className="text-2xl font-black tracking-tight">
+        <h1 key={`h1-${out.length}`} className="text-2xl font-black tracking-tight text-black">
           {line.slice(2)}
         </h1>
       );
@@ -40,7 +40,7 @@ export function renderMd(md: string) {
 
     if (line.startsWith('## ')) {
       out.push(
-        <h2 key={`h2-${out.length}`} className="mt-6 text-lg font-extrabold">
+        <h2 key={`h2-${out.length}`} className="mt-6 text-lg font-extrabold text-black">
           {line.slice(3)}
         </h2>
       );
@@ -55,7 +55,7 @@ export function renderMd(md: string) {
         i++;
       }
       out.push(
-        <ul key={`ul-${out.length}`} className="mt-3 list-disc pl-5 space-y-1 text-sm text-white/75">
+        <ul key={`ul-${out.length}`} className="mt-3 list-disc pl-5 space-y-1 text-sm text-black/75">
           {items.map((t) => (
             <li key={t}>{t}</li>
           ))}
@@ -77,7 +77,7 @@ export function renderMd(md: string) {
       i++;
     }
     out.push(
-      <p key={`p-${out.length}`} className="mt-3 text-sm leading-6 text-white/75">
+      <p key={`p-${out.length}`} className="mt-3 text-sm leading-6 text-black/75">
         {para.join(' ')}
       </p>
     );
