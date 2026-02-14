@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
+import { animFrame, animLabel, animPanel, animTitle } from './theme';
 
 export default function AccountModel() {
   const rootRef = useRef<HTMLDivElement | null>(null);
@@ -32,11 +33,11 @@ export default function AccountModel() {
   }, []);
 
   return (
-    <div ref={rootRef} className="rounded-3xl border border-black/10 bg-white/60 p-4 backdrop-blur-xl">
-      <div className="text-xs text-black/50">Animation</div>
-      <div className="text-sm font-extrabold text-black">Solana Account Structure</div>
+    <div ref={rootRef} className={animFrame}>
+      <div className={animLabel}>Animation</div>
+      <div className={animTitle}>Solana Account Structure</div>
 
-      <div className="mt-3 overflow-hidden rounded-2xl border border-black/10 bg-white/70">
+      <div className={animPanel}>
         <svg id="account-svg" width="100%" height="100%" viewBox="0 0 700 320" className="h-[220px] w-full">
           <defs>
             <linearGradient id="accountGradient" x1="0%" y1="0%" x2="100%" y2="0%">

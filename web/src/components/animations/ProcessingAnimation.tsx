@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
+import { animFrame, animLabel, animPanel, animTitle } from './theme';
 
 export default function ProcessingAnimation() {
   const rootRef = useRef<HTMLDivElement | null>(null);
@@ -63,10 +64,10 @@ export default function ProcessingAnimation() {
   }, []);
 
   return (
-    <div ref={rootRef} className="rounded-3xl border border-black/10 bg-white/60 p-4 backdrop-blur-xl">
-      <div className="text-xs text-black/50">Animation</div>
-      <div className="text-sm font-extrabold text-black">Sequential vs Parallel Processing</div>
-      <div className="mt-3 overflow-hidden rounded-2xl border border-black/10 bg-white/70">
+    <div ref={rootRef} className={animFrame}>
+      <div className={animLabel}>Animation</div>
+      <div className={animTitle}>Sequential vs Parallel Processing</div>
+      <div className={animPanel}>
         <svg id="processing-svg" width="100%" height="100%" viewBox="0 0 600 280" className="h-[210px] w-full">
           <defs>
             <filter id="glow-green">

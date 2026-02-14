@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { animBtn, animFrame, animLabel, animTitle } from './theme';
 
 type Fn = 'add' | 'sub' | 'mul';
 
@@ -62,31 +63,31 @@ export default function ComputerFlow() {
 
   const nodeCls = (k: typeof active) =>
     `rounded-2xl border px-4 py-3 transition ${
-      active === k ? 'border-emerald-600/35 bg-emerald-500/10' : 'border-black/10 bg-white/55'
+      active === k ? 'border-emerald-500/35 bg-emerald-500/10' : 'border-white/10 bg-white/5'
     }`;
 
   return (
-    <div className="rounded-3xl border border-black/10 bg-white/60 p-4 backdrop-blur-xl">
-      <div className="text-xs text-black/50">Animation</div>
-      <div className="text-sm font-extrabold text-black">Computer Flow: input → decode → execute → memory → output → share</div>
+    <div className={animFrame}>
+      <div className={animLabel}>Animation</div>
+      <div className={animTitle}>Computer Flow: input → decode → execute → memory → output → share</div>
 
       <div className="mt-3 flex flex-col sm:flex-row gap-3 sm:items-end sm:justify-between">
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          <label className="text-xs text-black/60">
+          <label className="text-xs text-slate-400">
             Input
             <input
               value={input}
               onChange={(e) => setInput(Number(e.target.value || 0))}
               type="number"
-              className="mt-1 w-full rounded-xl border border-black/10 bg-white/70 px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-slate-200"
             />
           </label>
-          <label className="text-xs text-black/60">
+          <label className="text-xs text-slate-400">
             Function
             <select
               value={fn}
               onChange={(e) => setFn(e.target.value as Fn)}
-              className="mt-1 w-full rounded-xl border border-black/10 bg-white/70 px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-slate-200"
             >
               <option value="add">add (+)</option>
               <option value="sub">subtract (-)</option>
@@ -94,50 +95,50 @@ export default function ComputerFlow() {
             </select>
           </label>
           <div className="flex gap-2">
-            <button onClick={doStep} className="mt-5 rounded-full bg-emerald-600 text-white font-extrabold px-4 py-2 text-sm">
+            <button onClick={doStep} className="mt-5 rounded-full bg-emerald-500/90 hover:bg-emerald-500 text-white font-extrabold px-4 py-2 text-sm">
               Step
             </button>
-            <button onClick={reset} className="mt-5 rounded-full border border-black/10 bg-white/70 font-extrabold px-4 py-2 text-sm">
+            <button onClick={reset} className={animBtn + " mt-5 px-4 py-2 text-sm"}>
               Reset
             </button>
           </div>
         </div>
 
-        <div className="text-xs text-black/60">
-          Current state value: <span className="font-mono font-bold text-black">{value}</span>
+        <div className="text-xs text-slate-400">
+          Current state value: <span className="font-mono font-bold text-slate-200">{value}</span>
         </div>
       </div>
 
-      <div className="mt-4 overflow-hidden rounded-2xl border border-black/10 bg-white/70 p-3">
+      <div className="mt-4 overflow-hidden rounded-2xl border border-white/10 bg-black/30 p-3">
         <div className="grid grid-cols-1 lg:grid-cols-6 gap-2 items-stretch">
           <div className={nodeCls('input')}>
-            <div className="text-xs text-black/50">Input</div>
+            <div className="text-xs text-slate-400">Input</div>
             <div className="text-sm font-extrabold">{input}</div>
           </div>
           <div className={nodeCls('decode')}>
-            <div className="text-xs text-black/50">Decode</div>
+            <div className="text-xs text-slate-400">Decode</div>
             <div className="text-sm font-extrabold">{cmd.label} {input}</div>
           </div>
           <div className={nodeCls('execute')}>
-            <div className="text-xs text-black/50">Execute</div>
+            <div className="text-xs text-slate-400">Execute</div>
             <div className="text-sm font-extrabold">{cmd.prev} {cmd.symbol} {input}</div>
           </div>
           <div className={nodeCls('memory')}>
-            <div className="text-xs text-black/50">Memory</div>
+            <div className="text-xs text-slate-400">Memory</div>
             <div className="text-sm font-extrabold">{value}</div>
           </div>
           <div className={nodeCls('output')}>
-            <div className="text-xs text-black/50">Output</div>
+            <div className="text-xs text-slate-400">Output</div>
             <div className="text-sm font-extrabold">{value}</div>
           </div>
           <div className={nodeCls('share')}>
-            <div className="text-xs text-black/50">Another computer</div>
+            <div className="text-xs text-slate-400">Another computer</div>
             <div className="text-sm font-extrabold">reads {value}</div>
           </div>
         </div>
       </div>
 
-      <div className="mt-3 text-xs text-black/60">
+      <div className="mt-3 text-xs text-slate-400">
         This mirrors the upstream “computer-flow” concept: inputs are processed; memory/state changes; others can read the result.
       </div>
     </div>

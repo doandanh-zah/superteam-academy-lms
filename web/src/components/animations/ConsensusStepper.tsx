@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { animBtn, animFrame, animLabel, animMuted, animTitle } from './theme';
 
 const STEPS = [
   { title: 'Collect Inputs', description: 'Transactions arrive from many clients into a shared pool of inputs.' },
@@ -15,30 +16,30 @@ export default function ConsensusStepper() {
   const progressPercent = useMemo(() => Math.round(((currentStep + 1) / STEPS.length) * 100), [currentStep]);
 
   return (
-    <div className="rounded-3xl border border-black/10 bg-white/60 p-4 backdrop-blur-xl">
-      <div className="text-xs text-black/50">Animation</div>
-      <div className="text-sm font-extrabold text-black">Consensus Input Stepper</div>
+    <div className={animFrame}>
+      <div className={animLabel}>Animation</div>
+      <div className={animTitle}>Consensus Input Stepper</div>
 
       <div className="mt-3 flex items-center justify-between gap-3">
-        <div className="text-xs text-black/60">{active.description}</div>
+        <div className={animMuted}>{active.description}</div>
         <div className="flex gap-2">
           <button
             onClick={() => setCurrentStep((s) => Math.max(0, s - 1))}
             disabled={currentStep === 0}
-            className="rounded-full border border-black/10 bg-white/70 px-3 py-1 text-xs font-extrabold hover:bg-white disabled:opacity-50"
+            className={animBtn}
           >
             Prev
           </button>
           <button
             onClick={() => setCurrentStep((s) => Math.min(STEPS.length - 1, s + 1))}
             disabled={currentStep === STEPS.length - 1}
-            className="rounded-full bg-emerald-600 text-white px-3 py-1 text-xs font-extrabold disabled:opacity-50"
+            className="rounded-full bg-emerald-500/90 hover:bg-emerald-500 text-white px-3 py-1 text-xs font-extrabold disabled:opacity-50"
           >
             Next
           </button>
           <button
             onClick={() => setCurrentStep(0)}
-            className="rounded-full border border-black/10 bg-white/70 px-3 py-1 text-xs font-extrabold hover:bg-white"
+            className={animBtn}
           >
             Reset
           </button>
@@ -56,8 +57,8 @@ export default function ConsensusStepper() {
             state === 'active'
               ? 'border-emerald-600/35 bg-emerald-500/10'
               : state === 'complete'
-                ? 'border-black/10 bg-white/70'
-                : 'border-black/10 bg-white/50';
+                ? 'border-white/10 bg-white/5'
+                : 'border-white/10 bg-black/20';
           return (
             <button
               key={s.title}
@@ -65,8 +66,8 @@ export default function ConsensusStepper() {
               onClick={() => setCurrentStep(idx)}
               className={`text-left rounded-2xl border px-3 py-2 ${cls}`}
             >
-              <div className="text-xs text-black/50">Step {idx + 1}</div>
-              <div className="text-sm font-extrabold text-black">{s.title}</div>
+              <div className="text-xs text-slate-400">Step {idx + 1}</div>
+              <div className="text-sm font-extrabold text-slate-200">{s.title}</div>
             </button>
           );
         })}

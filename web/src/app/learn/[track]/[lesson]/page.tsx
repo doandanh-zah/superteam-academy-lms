@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { ArrowLeft, ArrowRight, CheckCircle2, MessageSquare, Share2, Trophy } from 'lucide-react';
@@ -14,7 +14,8 @@ import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { trackStyle } from '@/components/ui/trackStyle';
-import { loadProgress, saveProgress, markLessonComplete, markQuizPassed, isQuizPassed } from '@/lib/progress';
+import { loadProgress, saveProgress, markLessonComplete, markQuizPassed, isQuizPassed, isLessonCompleted } from '@/lib/progress';
+import { getChecklist, setChecklist } from '@/lib/checklist';
 
 const MEMO_PROGRAM_ID = new PublicKey('MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr');
 
@@ -43,6 +44,13 @@ export default function LessonPage() {
   const next = idx >= 0 && idx < list.length - 1 ? list[idx + 1] : null;
 
   const quizPassed = isQuizPassed(state, track, lessonId);
+  const lessonDone = isLessonCompleted(state, track, lessonId);
+
+  // checklist auto-state: [read, all questions submitted, all correct/finished]
+  const checklist = getChecklist(state, track, lessonId);
+  const cl0 = checklist[0] ?? true; // consider "read" true once opened
+  const cl1 = checklist[1] ?? false;
+  const cl2 = checklist[2] ?? false;
 
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [submittedQ, setSubmittedQ] = useState<Record<string, boolean>>({});
@@ -55,6 +63,20 @@ export default function LessonPage() {
 
   const allSubmitted = lesson.quiz.every((q) => submittedQ[q.id]);
   const allCorrect = lesson.quiz.every((q) => isCorrect(q.id));
+
+  // keep checklist in sync with what user can actually do
+  // step0: opened/read, step1: all questions submitted, step2: all correct OR lesson already finished
+  // (stored in the same progress blob)
+  useEffect(() => {
+    const nextChecklist = [cl0, allSubmitted, allCorrect || lessonDone];
+    const prevChecklist = getChecklist(state, track, lessonId);
+    const same = prevChecklist.length === nextChecklist.length && prevChecklist.every((v, i) => v === nextChecklist[i]);
+    if (!same) {
+      const updated = setChecklist(state, track, lessonId, nextChecklist);
+      setState(updated);
+      saveProgress(walletKey, updated);
+    }
+  }, [cl0, allSubmitted, allCorrect, lessonDone, lessonId, track, walletKey, state]);
 
   async function submitQuestion(qid: string) {
     setErr('');
@@ -146,11 +168,12 @@ export default function LessonPage() {
         {/* Main Content */}
         <div className="lg:col-span-8 space-y-8">
           <Card hoverEffect={false} className="bg-[#1a1d2d]/90">
-            <div className="w-full h-48 bg-gradient-to-r from-slate-900 to-[#10121d] rounded-2xl mb-8 flex items-center justify-center border border-slate-800 shadow-inner overflow-hidden">
-              <div className="w-full h-full flex items-center justify-center">
+            {/* Animation Slot (only render when the lesson has one) */}
+            {['m1-blockchain-as-a-computer','m2-identity-and-authentication','m3-consensus-input-not-memory','m4-account-file','m5-program-library','m7-coding-with-claude'].includes(lessonId) ? (
+              <div className="mb-8">
                 <LessonAnimation lessonId={lessonId} />
               </div>
-            </div>
+            ) : null}
 
             <h1 className="text-3xl font-bold font-display text-white mb-4">{lesson.title}</h1>
 
@@ -313,16 +336,30 @@ export default function LessonPage() {
               <CheckCircle2 className="w-5 h-5 text-indigo-400" /> Lesson Checklist
             </h3>
 
-            <ul className="space-y-3 mb-8">
-              {(((lesson as any).content?.checklist) || ['Read the lesson', 'Understand the concepts', 'Complete the knowledge check']).map((it: string, i: number) => (
-                <li key={`${i}-${it}`} className="flex items-start gap-3 text-sm text-slate-300">
-                  <div className="w-5 h-5 rounded-full bg-white/5 border border-slate-700 text-transparent flex items-center justify-center flex-shrink-0 mt-0.5">
+            <ul className="space-y-3 mb-6">
+              {[
+                { label: 'Read the lesson', done: cl0 },
+                { label: 'Submit all quiz questions', done: allSubmitted },
+                { label: 'Get all answers correct (to finish)', done: allCorrect || lessonDone },
+              ].map((it) => (
+                <li key={it.label} className="flex items-start gap-3 text-sm text-slate-300">
+                  <div
+                    className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 border ${
+                      it.done
+                        ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300'
+                        : 'bg-white/5 border-slate-700 text-slate-600'
+                    }`}
+                  >
                     <CheckCircle2 className="w-3 h-3" />
                   </div>
-                  <span>{it}</span>
+                  <span className={it.done ? 'text-slate-200' : 'text-slate-400'}>{it.label}</span>
                 </li>
               ))}
             </ul>
+
+            <div className="text-xs text-slate-500 mb-6">
+              Finish is enabled only after you submit every question and all answers are correct.
+            </div>
 
             {/* Discussion Prompt */}
             <div className="bg-[#1a1d2d] rounded-2xl p-4 border border-indigo-500/20 shadow-lg mb-6">

@@ -5,6 +5,8 @@ export type ProgressState = {
   completedLessons: Record<string, boolean>;
   // key: `${track}:${lessonId}`
   quizPassed: Record<string, boolean>;
+  // key: `${track}:${lessonId}` -> [step0, step1, ...]
+  checklist?: Record<string, boolean[]>;
   // minimal XP model
   xp: number;
   updatedAt: string;
@@ -18,20 +20,21 @@ export function progressKey(wallet: string | null) {
 
 export function loadProgress(wallet: string | null): ProgressState {
   if (typeof window === 'undefined') {
-    return { completedLessons: {}, quizPassed: {}, xp: 0, updatedAt: new Date().toISOString() };
+    return { completedLessons: {}, quizPassed: {}, checklist: {}, xp: 0, updatedAt: new Date().toISOString() };
   }
   const raw = window.localStorage.getItem(progressKey(wallet));
-  if (!raw) return { completedLessons: {}, quizPassed: {}, xp: 0, updatedAt: new Date().toISOString() };
+  if (!raw) return { completedLessons: {}, quizPassed: {}, checklist: {}, xp: 0, updatedAt: new Date().toISOString() };
   try {
     const parsed = JSON.parse(raw);
     return {
       completedLessons: parsed.completedLessons || {},
       quizPassed: parsed.quizPassed || {},
+      checklist: parsed.checklist || {},
       xp: Number(parsed.xp || 0),
       updatedAt: parsed.updatedAt || new Date().toISOString(),
     };
   } catch {
-    return { completedLessons: {}, quizPassed: {}, xp: 0, updatedAt: new Date().toISOString() };
+    return { completedLessons: {}, quizPassed: {}, checklist: {}, xp: 0, updatedAt: new Date().toISOString() };
   }
 }
 
