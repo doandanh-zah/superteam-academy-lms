@@ -18,7 +18,7 @@ export default function TrackPage() {
       <div className="relative mx-auto max-w-6xl px-5 py-10">
         <header className="flex items-center justify-between gap-4">
           <div>
-            <Link href="/" className="text-xs text-black/60 hover:text-black">← dsuc-academy</Link>
+            <Link href="/" className="text-xs text-black/60 hover:text-black">← DSUC - Academy</Link>
             <h1 className="mt-2 text-2xl sm:text-3xl font-black tracking-tight text-black">{t?.title || track}</h1>
             <p className="text-black/60 mt-1">{t?.subtitle || ''}</p>
           </div>

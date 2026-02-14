@@ -14,8 +14,8 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "dsuc-academy",
-  description: "dsuc-academy — Solana learning platform (Genin → Chunin → Jonin).",
+  title: "DSUC - Academy",
+  description: "DSUC - Academy — Solana learning platform (Genin → Chunin → Jonin).",
 };
 
 export default function RootLayout({
