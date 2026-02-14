@@ -1,6 +1,7 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { gsap } from 'gsap';
 
 type Props = { lessonId: string };
 
@@ -101,6 +102,9 @@ export default function LessonAnimation({ lessonId }: Props) {
   const [resetTick, setResetTick] = useState(0);
   const [mode, setMode] = useState<'client-server' | 'p2p'>('client-server');
 
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const tlRef = useRef<gsap.core.Timeline | null>(null);
+
   const steps = useMemo<StepInfo[] | null>(() => {
     if (lessonId === 'm2-identity-and-authentication') {
       return [
@@ -138,6 +142,108 @@ export default function LessonAnimation({ lessonId }: Props) {
   const key = `${lessonId}:${resetTick}`;
   const cls = playing ? 'is-playing' : 'is-paused';
 
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+
+    // kill previous timeline
+    tlRef.current?.kill();
+    tlRef.current = null;
+
+    const q = gsap.utils.selector(root);
+
+    // default: subtle idle motion for dots/checks
+    const tl = gsap.timeline({ repeat: -1, defaults: { ease: 'power2.inOut' } });
+
+    // Build per-lesson timelines that mimic the upstream repo behavior:
+    // - highlight nodes sequentially
+    // - move "packets" along the flow
+    // - pulse completion states
+
+    if (lessonId === 'm1-blockchain-as-a-computer') {
+      // animate packet from client -> server/db OR client -> validators
+      tl.to(q('[data-anim="packet"]'), { x: mode === 'client-server' ? 360 : 230, duration: 1.1 })
+        .to(q('[data-anim="packet"]'), { x: mode === 'client-server' ? 650 : 460, duration: 1.1 })
+        .to(q('[data-anim="packet"]'), { x: 0, duration: 0.6, ease: 'power1.inOut' });
+
+      if (mode === 'p2p') {
+        tl.to(q('[data-anim="validator"]'), { opacity: 1, duration: 0.2, stagger: 0.06 }, 0.2)
+          .to(q('[data-anim="validator"]'), { opacity: 0.75, duration: 0.2, stagger: 0.06 }, 1.1);
+      }
+    } else if (lessonId === 'm2-identity-and-authentication') {
+      // loop across 5 stages like their lifecycle animation
+      const nodes = q('[data-anim="stage"]');
+      const dot = q('[data-anim="packet"]');
+
+      gsap.set(nodes, { opacity: 0.55 });
+      gsap.set(nodes[0], { opacity: 1 });
+
+      tl.clear();
+      for (let i = 0; i < 5; i++) {
+        tl.to(nodes, { opacity: 0.55, duration: 0.15 })
+          .to(nodes[i], { opacity: 1, duration: 0.15 }, '<')
+          .to(dot, { x: i * 170, duration: 0.5 }, '<');
+      }
+      tl.to(dot, { x: 0, duration: 0.45, ease: 'power1.inOut' });
+    } else if (lessonId === 'm3-consensus-input-not-memory') {
+      // animate tx blocks moving into canonical order (step-by-step)
+      const txs = ['TxA', 'TxB', 'TxC', 'TxD'];
+      const map: Record<string, number> = { TxB: 0, TxD: 1, TxA: 2, TxC: 3 };
+
+      tl.clear();
+      txs.forEach((t, idx) => {
+        tl.to(q(`[data-tx="${t}"]`), { x: 390 + map[t] * 86 - (80 + idx * 76), duration: 0.55, ease: 'power2.inOut' }, idx * 0.15);
+      });
+      tl.to(q('[data-anim="packet"]'), { x: 120, duration: 0.6 }, 0.1).to(q('[data-anim="packet"]'), { x: 0, duration: 0.6 }, 1.0);
+      tl.to(txs.map((t) => q(`[data-order="${t}"]`)).flat(), { opacity: 1, duration: 0.25, stagger: 0.08 }, 0.55);
+      tl.to({}, { duration: 0.35 });
+      tl.to(q('[data-anim="reset"]'), { opacity: 1, duration: 0 });
+      tl.to(txs.map((t) => q(`[data-tx="${t}"]`)).flat(), { x: 0, duration: 0.45, ease: 'power2.inOut' });
+      tl.to(q('[data-order]'), { opacity: 0, duration: 0.2 }, '<');
+      tl.to(q('[data-anim="reset"]'), { opacity: 0, duration: 0 }, '<');
+    } else if (lessonId === 'm4-account-file') {
+      // reveal fields one-by-one like their account-model animation
+      const fields = q('[data-anim="field"]');
+      gsap.set(fields, { opacity: 0, y: 6 });
+      tl.clear();
+      tl.to(fields[0], { opacity: 1, y: 0, duration: 0.35 })
+        .to(fields[1], { opacity: 1, y: 0, duration: 0.35 }, '+=0.35')
+        .to(fields[2], { opacity: 1, y: 0, duration: 0.35 }, '+=0.35')
+        .to(fields[3], { opacity: 1, y: 0, duration: 0.35 }, '+=0.35')
+        .to(fields, { opacity: 0.85, duration: 0.2 })
+        .to({}, { duration: 0.5 })
+        .to(fields, { opacity: 0, duration: 0.25 });
+    } else if (lessonId === 'm7-coding-with-claude') {
+      // pulse through prompt blocks like their prompt-flow stepper
+      const blocks = q('[data-anim="prompt"]');
+      gsap.set(blocks, { opacity: 0.55 });
+      tl.clear();
+      [0, 1, 2, 3].forEach((i) => {
+        tl.to(blocks, { opacity: 0.55, duration: 0.15 })
+          .to(blocks[i], { opacity: 1, duration: 0.15 }, '<')
+          .to(q('[data-anim="packet"]'), { x: i * 200, duration: 0.55 }, '<');
+      });
+      tl.to(q('[data-anim="packet"]'), { x: 0, duration: 0.45, ease: 'power1.inOut' });
+    } else {
+      // fallback subtle
+      tl.to(q('[data-anim="packet"]'), { x: 110, duration: 1.1 }).to(q('[data-anim="packet"]'), { x: 0, duration: 1.1 });
+    }
+
+    tlRef.current = tl;
+
+    return () => {
+      tl.kill();
+      tlRef.current = null;
+    };
+  }, [lessonId, mode, resetTick]);
+
+  useEffect(() => {
+    const tl = tlRef.current;
+    if (!tl) return;
+    if (playing) tl.play();
+    else tl.pause();
+  }, [playing]);
+
   return (
     <Frame>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -168,7 +274,7 @@ export default function LessonAnimation({ lessonId }: Props) {
       </div>
 
       <div className="mt-4 overflow-hidden rounded-2xl border border-black/10 bg-white/70">
-        <div className={`academy-anim ${cls}`}>
+        <div ref={rootRef} className={`academy-anim ${cls}`}>
           {/* M1: mimic "computer/network" style: clear boxes + moving packet */}
           {lessonId === 'm1-blockchain-as-a-computer' ? (
             <svg key={key + ':' + mode} viewBox="0 0 900 240" className="h-[170px] w-full">
@@ -195,7 +301,7 @@ export default function LessonAnimation({ lessonId }: Props) {
                   <path d="M 260 140 L 340 140" stroke="rgba(0,0,0,0.18)" strokeWidth="2" />
                   <path d="M 560 140 L 640 140" stroke="rgba(0,0,0,0.18)" strokeWidth="2" />
 
-                  <circle className="anim-dot" cx="260" cy="140" r="7" fill="#7c3aed" />
+                  <circle className="anim-dot" data-anim="packet" cx="260" cy="140" r="7" fill="#7c3aed" />
                 </>
               ) : (
                 <>
@@ -218,7 +324,11 @@ export default function LessonAnimation({ lessonId }: Props) {
                   })}
 
                   <path d="M 260 140 L 330 140" stroke="rgba(0,0,0,0.18)" strokeWidth="2" />
-                  <circle className="anim-dot" cx="260" cy="140" r="7" fill="#7c3aed" />
+                  <circle className="anim-dot" data-anim="packet" cx="260" cy="140" r="7" fill="#7c3aed" />
+
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <circle key={i} data-anim="validator" cx={407 + i * 92} cy={157} r={6} fill="#10b981" opacity={0.0} />
+                  ))}
 
                   <text x="370" y="212" fontSize="12" fill="rgba(0,0,0,0.55)">verify signatures → execute → replicate state</text>
                 </>
@@ -233,7 +343,7 @@ export default function LessonAnimation({ lessonId }: Props) {
                 const x = 45 + i * 170;
                 const active = i <= clampedStep;
                 return (
-                  <g key={t}>
+                  <g key={t} data-anim="stage">
                     <rect
                       x={x}
                       y={76}
@@ -251,7 +361,7 @@ export default function LessonAnimation({ lessonId }: Props) {
                   </g>
                 );
               })}
-              <circle className="anim-dot" cx={185 + clampedStep * 170} cy={122} r="7" fill="#7c3aed" />
+              <circle className="anim-dot" data-anim="packet" cx={185} cy={122} r="7" fill="#7c3aed" />
             </svg>
           ) : null}
 
@@ -264,7 +374,7 @@ export default function LessonAnimation({ lessonId }: Props) {
                 const x = 80 + i * 76;
                 const y = 122;
                 return (
-                  <g key={t}>
+                  <g key={t} data-tx={t}>
                     <rect x={x} y={y} width={60} height={38} rx={12} fill="rgba(124,58,237,0.10)" stroke="rgba(124,58,237,0.22)" />
                     <text x={x + 17} y={y + 25} fontSize="12" fontWeight="900" fill="#1f1147">{t}</text>
                   </g>
@@ -274,11 +384,11 @@ export default function LessonAnimation({ lessonId }: Props) {
               <rect x="470" y="60" width="385" height="160" rx="20" fill="rgba(16,185,129,0.10)" stroke="rgba(16,185,129,0.22)" />
               <text x="500" y="92" fontSize="14" fontWeight="900" fill="#052e2b">Canonical order</text>
 
-              {['TxB', 'TxD', 'TxA', 'TxC'].slice(0, Math.max(1, clampedStep + 1)).map((t, i) => {
+              {['TxB', 'TxD', 'TxA', 'TxC'].map((t, i) => {
                 const x = 505 + i * 86;
                 const y = 128;
                 return (
-                  <g key={t}>
+                  <g key={t} data-order={t} opacity={0}>
                     <rect x={x} y={y} width={70} height={42} rx={14} fill="rgba(16,185,129,0.12)" stroke="rgba(16,185,129,0.30)" />
                     <text x={x + 20} y={y + 27} fontSize="12" fontWeight="900" fill="#052e2b">{t}</text>
                   </g>
@@ -286,7 +396,10 @@ export default function LessonAnimation({ lessonId }: Props) {
               })}
 
               <path d="M 405 140 L 470 140" stroke="rgba(0,0,0,0.16)" strokeWidth="2" />
-              <circle className="anim-dot" cx={405 + clampedStep * 20} cy={140} r="7" fill="#7c3aed" />
+              <circle className="anim-dot" data-anim="packet" cx={405} cy={140} r="7" fill="#7c3aed" />
+              <text data-anim="reset" x="500" y="206" fontSize="12" fill="rgba(0,0,0,0.55)" opacity={0}>
+                Reset
+              </text>
             </svg>
           ) : null}
 
@@ -301,7 +414,7 @@ export default function LessonAnimation({ lessonId }: Props) {
                 { t: 'owner', c: 'rgba(0,0,0,0.04)' },
                 { t: 'executable', c: 'rgba(16,185,129,0.10)' },
               ].map((x, i) => (
-                <g key={x.t}>
+                <g key={x.t} data-anim="field">
                   <rect x={100 + i * 185} y={96} width={170} height={90} rx={18} fill={x.c} stroke="rgba(0,0,0,0.10)" />
                   <text x={120 + i * 185} y={134} fontSize="14" fontWeight="900" fill="#0b1411">{x.t}</text>
                   <text x={120 + i * 185} y={156} fontSize="12" fill="rgba(0,0,0,0.55)">field</text>
@@ -356,7 +469,7 @@ export default function LessonAnimation({ lessonId }: Props) {
                 const x = 75 + i * 200;
                 const active = i <= clampedStep;
                 return (
-                  <g key={t}>
+                  <g key={t} data-anim="prompt">
                     <rect x={x} y={86} width={170} height={86} rx={18} fill={active ? 'rgba(16,185,129,0.10)' : 'rgba(0,0,0,0.03)'} stroke={active ? 'rgba(16,185,129,0.28)' : 'rgba(0,0,0,0.10)'} />
                     <text x={x + 18} y={124} fontSize="14" fontWeight="900" fill="#0b1411">{t}</text>
                     <text x={x + 18} y={146} fontSize="12" fill="rgba(0,0,0,0.55)">prompt block</text>
@@ -364,7 +477,7 @@ export default function LessonAnimation({ lessonId }: Props) {
                   </g>
                 );
               })}
-              <circle className="anim-dot" cx={150 + clampedStep * 200} cy={129} r="7" fill="#7c3aed" />
+              <circle className="anim-dot" data-anim="packet" cx={150} cy={129} r="7" fill="#7c3aed" />
             </svg>
           ) : null}
         </div>
