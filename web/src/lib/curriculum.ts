@@ -1,4 +1,4 @@
-export type TrackId = 'beginner101';
+export type TrackId = 'genin' | 'chunin' | 'jonin';
 
 export type QuizChoice = { id: string; label: string };
 export type QuizQuestion = {
@@ -21,21 +21,33 @@ export type Lesson = {
   quiz: QuizQuestion[];
 };
 
+// Roadmap inspiration:
+// https://superteamvn.substack.com/p/solana-developer-journey
 export const TRACKS: { id: TrackId; title: string; subtitle: string }[] = [
   {
-    id: 'beginner101',
-    title: 'Solana Rapid-Fire Beginner 101',
-    subtitle: 'Upgraded course: interactive animations + deeper explanations + more quizzes',
+    id: 'genin',
+    title: 'Genin (Beginner)',
+    subtitle: 'Core concepts + first hands-on builds (Solana 101)',
+  },
+  {
+    id: 'chunin',
+    title: 'Chunin (Builder)',
+    subtitle: 'Complex apps, Anchor patterns, CPI, compute budget, production mindset',
+  },
+  {
+    id: 'jonin',
+    title: 'Jonin (Expert)',
+    subtitle: 'Advanced optimization, protocol-level understanding, security, leadership',
   },
 ];
 
-// This curriculum is based on the official-style outline from:
+// --- GENIN (Beginner) ---
+// Based on the official-style outline from:
 // https://github.com/Lab-Blueprint/Solana-Rapid-Fire-Beginner-101 (docs/module-outline.md)
-// We keep the spirit but upgrade the UX, depth, and interactivity.
 export const LESSONS: Lesson[] = [
   {
     id: 'm1-blockchain-as-a-computer',
-    track: 'beginner101',
+    track: 'genin',
     title: 'Module 1: Blockchain as a Computer',
     minutes: 12,
     content: {
@@ -131,7 +143,7 @@ That’s why blockchains are not for every app — they’re for the apps where 
 
   {
     id: 'm2-identity-and-authentication',
-    track: 'beginner101',
+    track: 'genin',
     title: 'Module 2: Identity & Authentication',
     minutes: 13,
     content: {
@@ -172,12 +184,6 @@ Your app talks to an RPC node to:
 
 But RPC nodes aren’t “the chain”. If everyone relies on a few RPCs, user access becomes centralized.
 `,
-      callouts: [
-        {
-          title: 'Security note',
-          body: 'When signing, always confirm the domain/app you trust. A signature is an approval: treat it like a powerful action.',
-        },
-      ],
     },
     quiz: [
       {
@@ -240,7 +246,7 @@ But RPC nodes aren’t “the chain”. If everyone relies on a few RPCs, user a
 
   {
     id: 'm3-consensus-input-not-memory',
-    track: 'beginner101',
+    track: 'genin',
     title: 'Module 3: Consensus (Input, Not Memory)',
     minutes: 13,
     content: {
@@ -329,7 +335,7 @@ Even if validators are decentralized, if most apps rely on 1–3 RPC providers:
 
   {
     id: 'm4-account-file',
-    track: 'beginner101',
+    track: 'genin',
     title: 'Module 4: Account = File',
     minutes: 14,
     content: {
@@ -357,72 +363,13 @@ Programs are shared code.
 State lives in accounts.
 This makes the model composable: many users can call the same program with different accounts.
 `,
-      callouts: [
-        { title: 'Common mistake', body: 'If you do not validate ownership and writable accounts, your program can be tricked into writing to the wrong state.' },
-      ],
     },
-    quiz: [
-      {
-        id: 'q1',
-        prompt: 'Who can modify an account’s data?',
-        choices: [
-          { id: 'a', label: 'Anyone who knows the address' },
-          { id: 'b', label: 'Only the program that owns the account' },
-          { id: 'c', label: 'Only the RPC provider' },
-        ],
-        correctChoiceId: 'b',
-        explanation: 'The owner program is the only entity allowed to write to the account data.',
-      },
-      {
-        id: 'q2',
-        prompt: 'What does the “owner” field mean?',
-        choices: [
-          { id: 'a', label: 'The wallet that created the account' },
-          { id: 'b', label: 'The program id that is allowed to modify the account data' },
-          { id: 'c', label: 'The RPC endpoint that stores it' },
-        ],
-        correctChoiceId: 'b',
-        explanation: 'Owner is the program that controls write access to the account’s data.',
-      },
-      {
-        id: 'q3',
-        prompt: 'What does “rent-exempt” mean?',
-        choices: [
-          { id: 'a', label: 'The account has enough lamports to persist without being reclaimed' },
-          { id: 'b', label: 'The account never needs signatures' },
-          { id: 'c', label: 'The account is private' },
-        ],
-        correctChoiceId: 'a',
-        explanation: 'Rent-exempt accounts hold a minimum balance to stay allocated.',
-      },
-      {
-        id: 'q4',
-        prompt: 'Why separate programs (code) and accounts (data)?',
-        choices: [
-          { id: 'a', label: 'So programs are reusable and state is explicit in accounts' },
-          { id: 'b', label: 'So you can skip consensus' },
-          { id: 'c', label: 'So fees are removed' },
-        ],
-        correctChoiceId: 'a',
-        explanation: 'Shared code + explicit state enables composability and safety checks.',
-      },
-      {
-        id: 'q5',
-        prompt: 'Anyone can read account data, but writes require…',
-        choices: [
-          { id: 'a', label: 'Account ownership by the writing program' },
-          { id: 'b', label: 'A larger screen size' },
-          { id: 'c', label: 'A special RPC token' },
-        ],
-        correctChoiceId: 'a',
-        explanation: 'Writes are constrained by the owner program and writable account flags.',
-      },
-    ],
+    quiz: [],
   },
 
   {
     id: 'm5-program-library',
-    track: 'beginner101',
+    track: 'genin',
     title: 'Module 5: Program = Library',
     minutes: 14,
     content: {
@@ -453,68 +400,12 @@ A PDA:
 Use PDAs for deterministic state (config, profiles, escrow vaults).
 `,
     },
-    quiz: [
-      {
-        id: 'q1',
-        prompt: '“Stateless program” means…',
-        choices: [
-          { id: 'a', label: 'Programs keep private variables between calls' },
-          { id: 'b', label: 'Programs rely on accounts for state; each call is self-contained' },
-          { id: 'c', label: 'Programs cannot read account data' },
-        ],
-        correctChoiceId: 'b',
-        explanation: 'State is stored in accounts; the program reads/writes it per instruction.',
-      },
-      {
-        id: 'q2',
-        prompt: 'Why are PDAs useful?',
-        choices: [
-          { id: 'a', label: 'They allow deterministic, program-owned state accounts' },
-          { id: 'b', label: 'They remove transaction fees' },
-          { id: 'c', label: 'They replace validators' },
-        ],
-        correctChoiceId: 'a',
-        explanation: 'PDAs let programs control addresses without private keys.',
-      },
-      {
-        id: 'q3',
-        prompt: 'Can a PDA be generated with a private key?',
-        choices: [
-          { id: 'a', label: 'Yes' },
-          { id: 'b', label: 'No' },
-          { id: 'c', label: 'Only on devnet' },
-        ],
-        correctChoiceId: 'b',
-        explanation: 'PDAs are derived addresses, typically off-curve, not controlled by a private key.',
-      },
-      {
-        id: 'q4',
-        prompt: 'A Solana program is most similar to…',
-        choices: [
-          { id: 'a', label: 'A shared library that many users call' },
-          { id: 'b', label: 'A private database owned by one user' },
-          { id: 'c', label: 'A password manager' },
-        ],
-        correctChoiceId: 'a',
-        explanation: 'Programs are shared code used by many users.',
-      },
-      {
-        id: 'q5',
-        prompt: 'Where does persistent state live on Solana?',
-        choices: [
-          { id: 'a', label: 'Inside the program binary' },
-          { id: 'b', label: 'In accounts' },
-          { id: 'c', label: 'In the wallet UI' },
-        ],
-        correctChoiceId: 'b',
-        explanation: 'Programs are stateless; accounts hold persistent data.',
-      },
-    ],
+    quiz: [],
   },
 
   {
     id: 'm6-environment-setup-minimal',
-    track: 'beginner101',
+    track: 'genin',
     title: 'Module 6: Environment Setup (Minimal)',
     minutes: 12,
     content: {
@@ -537,77 +428,18 @@ A typical minimal local toolchain:
 - **Anchor** (framework to reduce boilerplate)
 
 ## Practical strategy
-- Start in Playground until you understand the model.
-- Switch to local setup when you start shipping.
+Start in Playground until you understand the model.
+Switch to local setup when you start shipping.
 
 Don’t over-install first. Your goal is a working loop: build → test → iterate.
 `,
-      callouts: [
-        { title: 'Tip', body: 'The best setup is the one that keeps you shipping. Keep it minimal at first.' },
-      ],
     },
-    quiz: [
-      {
-        id: 'q1',
-        prompt: 'Which tool compiles Solana programs?',
-        choices: [
-          { id: 'a', label: 'Rust toolchain (cargo / rustc)' },
-          { id: 'b', label: 'A wallet' },
-          { id: 'c', label: 'Solscan' },
-        ],
-        correctChoiceId: 'a',
-        explanation: 'Most Solana programs are written in Rust and compiled with cargo/rustc.',
-      },
-      {
-        id: 'q2',
-        prompt: 'Which network is recommended for testing first?',
-        choices: [
-          { id: 'a', label: 'Mainnet-beta' },
-          { id: 'b', label: 'Devnet (or localnet)' },
-          { id: 'c', label: 'A random RPC' },
-        ],
-        correctChoiceId: 'b',
-        explanation: 'Devnet/localnet are safer for iteration and avoid real cost.',
-      },
-      {
-        id: 'q3',
-        prompt: 'What is Anchor used for?',
-        choices: [
-          { id: 'a', label: 'A framework that helps structure programs and validate accounts safely' },
-          { id: 'b', label: 'A centralized hosting service' },
-          { id: 'c', label: 'A token standard' },
-        ],
-        correctChoiceId: 'a',
-        explanation: 'Anchor reduces boilerplate and encourages safer patterns.',
-      },
-      {
-        id: 'q4',
-        prompt: 'What should you optimize for when setting up?',
-        choices: [
-          { id: 'a', label: 'Installing every tool immediately' },
-          { id: 'b', label: 'A minimal build/test loop that works' },
-          { id: 'c', label: 'Deploying to mainnet first' },
-        ],
-        correctChoiceId: 'b',
-        explanation: 'A working loop is the foundation; add complexity later.',
-      },
-      {
-        id: 'q5',
-        prompt: 'Why might Playground be useful early on?',
-        choices: [
-          { id: 'a', label: 'It removes setup friction so you can focus on concepts' },
-          { id: 'b', label: 'It guarantees your contract is secure' },
-          { id: 'c', label: 'It replaces validators' },
-        ],
-        correctChoiceId: 'a',
-        explanation: 'Less setup means faster learning and iteration.',
-      },
-    ],
+    quiz: [],
   },
 
   {
     id: 'm7-coding-with-claude',
-    track: 'beginner101',
+    track: 'genin',
     title: 'Module 7: Coding with Claude',
     minutes: 14,
     content: {
@@ -637,67 +469,45 @@ Tests should cover:
 
 If the AI can’t explain the invariants and threat model, the feature isn’t ready.
 `,
-      callouts: [
-        { title: 'Quality bar', body: 'Treat AI output like an intern: useful, but needs a strict review checklist.' },
-      ],
     },
-    quiz: [
-      {
-        id: 'q1',
-        prompt: 'What should a good prompt include?',
-        choices: [
-          { id: 'a', label: 'Only a vague idea' },
-          { id: 'b', label: 'Context + goal + constraints + acceptance criteria' },
-          { id: 'c', label: 'Only the token name' },
-        ],
-        correctChoiceId: 'b',
-        explanation: 'Structured prompts produce better, safer results.',
-      },
-      {
-        id: 'q2',
-        prompt: 'In the “Wall of Wishes” example, which account tracks the total number of wishes?',
-        choices: [
-          { id: 'a', label: 'A global counter account' },
-          { id: 'b', label: 'The RPC node' },
-          { id: 'c', label: 'The wallet UI' },
-        ],
-        correctChoiceId: 'a',
-        explanation: 'A global counter stores shared state; user entries can be per-user PDAs.',
-      },
-      {
-        id: 'q3',
-        prompt: 'Why test before deploying?',
-        choices: [
-          { id: 'a', label: 'To catch missing checks and invariant bugs early' },
-          { id: 'b', label: 'To remove fees' },
-          { id: 'c', label: 'Because mainnet refuses deployment without tests' },
-        ],
-        correctChoiceId: 'a',
-        explanation: 'Testing is where security mistakes are found before damage is possible.',
-      },
-      {
-        id: 'q4',
-        prompt: 'What is the biggest risk of using AI for on-chain code?',
-        choices: [
-          { id: 'a', label: 'It may omit security checks unless explicitly required' },
-          { id: 'b', label: 'It cannot write Rust' },
-          { id: 'c', label: 'It always uses devnet' },
-        ],
-        correctChoiceId: 'a',
-        explanation: 'AI can produce plausible code that is unsafe if invariants and checks are missing.',
-      },
-      {
-        id: 'q5',
-        prompt: 'Which is a good acceptance criterion for an AI-generated Solana instruction?',
-        choices: [
-          { id: 'a', label: '“It works on my machine” only' },
-          { id: 'b', label: '“Has tests for signer, PDA, ownership, and invariant cases”' },
-          { id: 'c', label: '“Looks clean in UI”' },
-        ],
-        correctChoiceId: 'b',
-        explanation: 'Acceptance criteria should include security-relevant tests and edge cases.',
-      },
-    ],
+    quiz: [],
+  },
+
+  // --- CHUNIN / JONIN placeholders (coming soon) ---
+  {
+    id: 'coming-soon',
+    track: 'chunin',
+    title: 'Coming soon: Chunin curriculum',
+    minutes: 3,
+    content: {
+      md: `# Chunin (Builder) — Coming soon
+
+We will build this track from the **Solana Developer Journey** roadmap:
+- deeper Anchor
+- CPI
+- compute budget & fees
+- architecture patterns
+- production debugging + security mindset
+`,
+    },
+    quiz: [],
+  },
+  {
+    id: 'coming-soon',
+    track: 'jonin',
+    title: 'Coming soon: Jonin curriculum',
+    minutes: 3,
+    content: {
+      md: `# Jonin (Expert) — Coming soon
+
+We will build this track from the roadmap:
+- protocol-level topics
+- optimization & performance
+- security/auditing
+- ecosystem leadership
+`,
+    },
+    quiz: [],
   },
 ];
 
